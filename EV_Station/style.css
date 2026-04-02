@@ -1,0 +1,61 @@
+body, .navbar, .card, h6, h3, h5 {
+  font-family: 'TH Sarabun PSK', sans-serif;
+}
+
+.main-flex {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#map {
+  width: 850px;
+  height: 530px;
+  margin: 0;
+  border: 2px solid #999;
+  border-radius: 18px;
+}
+
+.sidebar {
+  width: 350px;
+  min-width: 220px;
+  margin-left: 18px;
+}
+
+.info-card {
+  text-align: center;
+  font-size: 1.12em;
+  margin-bottom: 1rem;
+}
+
+#summary, #details {
+  font-size: 1.15em;
+}
+
+.ref-btn {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.text-low { color: #d7191c; }
+.text-med { color: #fdae61; }
+.text-high { color: #1a9641; }
+
+.desc-class { font-size: 0.98em; }
+
+@media (max-width: 1200px) {
+  #map {
+    width: 96vw;
+    height: 58vw;
+    min-height: 270px;
+  }
+  .sidebar {
+    width: 97vw;
+    margin-left: 0;
+    margin-top: 12px;
+  }
+  .main-flex {
+    flex-direction: column;
+    align-items: center;
+  }
+}
