@@ -1,837 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-    
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
-    
-            <meta name="viewport" content="width=device-width,
-                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-            <style>
-                #map_b3f9637596d1ff06170ce0786e748eae {
-                    position: relative;
-                    width: 100.0%;
-                    height: 100.0%;
-                    left: 0.0%;
-                    top: 0.0%;
-                }
-                .leaflet-container { font-size: 1rem; }
-            </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Web GIS แสดงค่าความเหมาะสมการจัดตั้งสถานีชาร์จ EVS ในปั้มพื้นที่ชลบุรี</title>
 
-            <style>html, body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            </style>
 
-            <style>#map {
-                position:absolute;
-                top:0;
-                bottom:0;
-                right:0;
-                left:0;
-                }
-            </style>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-            <script>
-                L_NO_TOUCH = false;
-                L_DISABLE_3D = false;
-            </script>
 
-        
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous"/>
+
+ 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+
+
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-    
-    
-            <div class="folium-map" id="map_b3f9637596d1ff06170ce0786e748eae" ></div>
-        
+  <nav class="navbar bg-primary navbar-dark py-2 mb-2">
+    <div class="container-fluid d-flex justify-content-between align-items-center px-4">
+      <span class="navbar-brand mb-0 h1">Web GIS แสดงค่าความเหมาะสมการจัดตั้งสถานีชาร์จ EVS ในปั้มพื้นที่ชลบุรี</span>
+      <button id="toggleHeat" class="btn btn-light btn-swap">Swap to heat map</button>
+    </div>
+  </nav>
+
+  <div class="main-flex">
+
+    <div>
+      <div id="map"></div>
+    </div>
+
+
+    <div class="sidebar">
+
+      <div class="card info-card">
+        <div class="card-body p-2">
+          <div>
+            <span class="text-low fw-bold">Low</span>: <span id="count-low">0</span>
+            &nbsp;|&nbsp;
+            <span class="text-med fw-bold">Medium</span>: <span id="count-med">0</span>
+            &nbsp;|&nbsp;
+            <span class="text-high fw-bold">High</span>: <span id="count-high">0</span>
+          </div>
+          <div class="desc-class text-secondary mt-1">
+            Low: ต่ำกว่า 0.4<br>
+            Medium: 0.4 – &lt;0.7<br>
+            High: ≥ 0.7
+          </div>
+          <div class="mt-1 text-info">รวมทั้งหมด: <span id="count-all"></span></div>
+        </div>
+      </div>
+
+      <button id="setRefBtn" class="btn btn-outline-primary ref-btn">
+        เลือกตำแหน่งอ้างอิง
+      </button>
+
+
+      <div id="details" class="bg-light p-2 rounded shadow-sm mb-2"></div>
+
+      <div id="summary" class="bg-white p-2 mb-2"></div>
+
+ 
+      <div id="legend" class="p-2 bg-white rounded shadow-sm mb-2">
+        <h6 class="mb-1">Legend</h6>
+        <div style="height:8px; background: linear-gradient(to right, #d7191c, #fdae61, #1a9641);"></div>
+        <div class="d-flex justify-content-between small mt-1">
+          <span>0.0</span><span>0.5</span><span>1.0</span>
+        </div>
+      </div>
+
+
+      <div id="coords" class="p-2 bg-white rounded shadow-sm">
+        <h6 class="small mb-1">Coordinates</h6>
+        <div>Lat: <span id="lat">—</span></div>
+        <div>Lng: <span id="lng">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+  <script src="./script.js"></script>
 </body>
-<script>
-    
-    
-            var map_b3f9637596d1ff06170ce0786e748eae = L.map(
-                "map_b3f9637596d1ff06170ce0786e748eae",
-                {
-                    center: [13.736717, 100.523186],
-                    crs: L.CRS.EPSG3857,
-                    ...{
-  "zoom": 6,
-  "zoomControl": true,
-  "preferCanvas": false,
-}
-
-                }
-            );
-
-            
-
-        
-    
-            var tile_layer_996721f529f717ff05155cdb03fab8ee = L.tileLayer(
-                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                {
-  "minZoom": 0,
-  "maxZoom": 19,
-  "maxNativeZoom": 19,
-  "noWrap": false,
-  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
-  "subdomains": "abc",
-  "detectRetina": false,
-  "tms": false,
-  "opacity": 1,
-}
-
-            );
-        
-    
-            tile_layer_996721f529f717ff05155cdb03fab8ee.addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-            var circle_marker_4c6890ee001ce964a13a736556d57f7e = L.circleMarker(
-                [16.22291, 103.5145],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_514818595c0e2174d88658bd83881cda = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_2f9e7c4fde56da78f4837d748a99562a = $(`<div id="html_2f9e7c4fde56da78f4837d748a99562a" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: กาฬสินธุ์</div>`)[0];
-                popup_514818595c0e2174d88658bd83881cda.setContent(html_2f9e7c4fde56da78f4837d748a99562a);
-            
-        
-
-        circle_marker_4c6890ee001ce964a13a736556d57f7e.bindPopup(popup_514818595c0e2174d88658bd83881cda)
-        ;
-
-        
-    
-    
-            var circle_marker_23fdd1e4f8e5d8ddc9f42de0287b68bb = L.circleMarker(
-                [16.22421, 103.51205],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_bf93cbf5468316c300232c16877c9b4c = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_6ed085237622f00f4f2e42187f2812a5 = $(`<div id="html_6ed085237622f00f4f2e42187f2812a5" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: กาฬสินธุ์</div>`)[0];
-                popup_bf93cbf5468316c300232c16877c9b4c.setContent(html_6ed085237622f00f4f2e42187f2812a5);
-            
-        
-
-        circle_marker_23fdd1e4f8e5d8ddc9f42de0287b68bb.bindPopup(popup_bf93cbf5468316c300232c16877c9b4c)
-        ;
-
-        
-    
-    
-            var circle_marker_0ef3a6381553fed7029878b5fd22ab06 = L.circleMarker(
-                [16.22396, 103.51286],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_fdbf0402abada87d2ac5af5d26a0e832 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_c0ef0d7b8f80d8e8f868760d6115ad46 = $(`<div id="html_c0ef0d7b8f80d8e8f868760d6115ad46" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: กาฬสินธุ์</div>`)[0];
-                popup_fdbf0402abada87d2ac5af5d26a0e832.setContent(html_c0ef0d7b8f80d8e8f868760d6115ad46);
-            
-        
-
-        circle_marker_0ef3a6381553fed7029878b5fd22ab06.bindPopup(popup_fdbf0402abada87d2ac5af5d26a0e832)
-        ;
-
-        
-    
-    
-            var circle_marker_19521e67831ac845612b2a1f6e28c4d4 = L.circleMarker(
-                [13.82182, 101.08698],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_f891c0ddaa51f15bc85954c0f9e06357 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_576d87f4f83b5ee6a5108a620a3e75a1 = $(`<div id="html_576d87f4f83b5ee6a5108a620a3e75a1" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: ฉะเชิงเทรา</div>`)[0];
-                popup_f891c0ddaa51f15bc85954c0f9e06357.setContent(html_576d87f4f83b5ee6a5108a620a3e75a1);
-            
-        
-
-        circle_marker_19521e67831ac845612b2a1f6e28c4d4.bindPopup(popup_f891c0ddaa51f15bc85954c0f9e06357)
-        ;
-
-        
-    
-    
-            var circle_marker_1ddff1d4a209614def6bf28010ed1781 = L.circleMarker(
-                [13.19399, 101.16113],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_b2c37dd61a15dbf7b8a6e6efc312c11b = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_f767b295996f7d25c0aa391fcfb98c0b = $(`<div id="html_f767b295996f7d25c0aa391fcfb98c0b" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: ชลบุรี</div>`)[0];
-                popup_b2c37dd61a15dbf7b8a6e6efc312c11b.setContent(html_f767b295996f7d25c0aa391fcfb98c0b);
-            
-        
-
-        circle_marker_1ddff1d4a209614def6bf28010ed1781.bindPopup(popup_b2c37dd61a15dbf7b8a6e6efc312c11b)
-        ;
-
-        
-    
-    
-            var circle_marker_0ac863e2fd43eecb06052d323281a4c1 = L.circleMarker(
-                [16.11275, 101.6226],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_7110fb4f7ad2c9fb4550070e683abb2c = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_4b62cb409e3691e5dc4a2c329384b931 = $(`<div id="html_4b62cb409e3691e5dc4a2c329384b931" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: ชัยภูมิ</div>`)[0];
-                popup_7110fb4f7ad2c9fb4550070e683abb2c.setContent(html_4b62cb409e3691e5dc4a2c329384b931);
-            
-        
-
-        circle_marker_0ac863e2fd43eecb06052d323281a4c1.bindPopup(popup_7110fb4f7ad2c9fb4550070e683abb2c)
-        ;
-
-        
-    
-    
-            var circle_marker_0630cd22d825cadf14c44d12f56ba56e = L.circleMarker(
-                [17.11917, 98.80965],
-                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_7ba7861cc4e43c33d6d698628fc1fc0c = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_d3e73a8bbda5b2a51992b54f7b463f35 = $(`<div id="html_d3e73a8bbda5b2a51992b54f7b463f35" style="width: 100.0%; height: 100.0%;">Region: ภาคเหนือ<br>Province: ตาก</div>`)[0];
-                popup_7ba7861cc4e43c33d6d698628fc1fc0c.setContent(html_d3e73a8bbda5b2a51992b54f7b463f35);
-            
-        
-
-        circle_marker_0630cd22d825cadf14c44d12f56ba56e.bindPopup(popup_7ba7861cc4e43c33d6d698628fc1fc0c)
-        ;
-
-        
-    
-    
-            var circle_marker_956725c828a53399d0cca81e67c71038 = L.circleMarker(
-                [14.60406, 101.91457],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_1f9e3740cc99f4a3ecbbcf0b12b27d6d = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_10dbe11a3aa0591502c64d5dd199f319 = $(`<div id="html_10dbe11a3aa0591502c64d5dd199f319" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: นครราชสีมา</div>`)[0];
-                popup_1f9e3740cc99f4a3ecbbcf0b12b27d6d.setContent(html_10dbe11a3aa0591502c64d5dd199f319);
-            
-        
-
-        circle_marker_956725c828a53399d0cca81e67c71038.bindPopup(popup_1f9e3740cc99f4a3ecbbcf0b12b27d6d)
-        ;
-
-        
-    
-    
-            var circle_marker_da517e28572b4dfb95c63785a392fbee = L.circleMarker(
-                [15.02518, 102.17297],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_bab4f2f52fb7f9fc594ac124c529e9d8 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_6de7aac94fd7737f5b5c59161ec44399 = $(`<div id="html_6de7aac94fd7737f5b5c59161ec44399" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: นครราชสีมา</div>`)[0];
-                popup_bab4f2f52fb7f9fc594ac124c529e9d8.setContent(html_6de7aac94fd7737f5b5c59161ec44399);
-            
-        
-
-        circle_marker_da517e28572b4dfb95c63785a392fbee.bindPopup(popup_bab4f2f52fb7f9fc594ac124c529e9d8)
-        ;
-
-        
-    
-    
-            var circle_marker_6c4fa418696a388a985e8c408f2a0bfc = L.circleMarker(
-                [15.02598, 102.1722],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_d50ba7bb8d5b8359a8fba03e342a126e = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_36ff3d29a544cb56695cb0536df634be = $(`<div id="html_36ff3d29a544cb56695cb0536df634be" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: นครราชสีมา</div>`)[0];
-                popup_d50ba7bb8d5b8359a8fba03e342a126e.setContent(html_36ff3d29a544cb56695cb0536df634be);
-            
-        
-
-        circle_marker_6c4fa418696a388a985e8c408f2a0bfc.bindPopup(popup_d50ba7bb8d5b8359a8fba03e342a126e)
-        ;
-
-        
-    
-    
-            var circle_marker_9710699365529cb5070bcb72ecb0d568 = L.circleMarker(
-                [18.07664, 103.90844],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_a8436be57d7dd66c337ed205cf64554e = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_14ed4af28d6de0b283a7f51c64893bc2 = $(`<div id="html_14ed4af28d6de0b283a7f51c64893bc2" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: บึงกาฬ</div>`)[0];
-                popup_a8436be57d7dd66c337ed205cf64554e.setContent(html_14ed4af28d6de0b283a7f51c64893bc2);
-            
-        
-
-        circle_marker_9710699365529cb5070bcb72ecb0d568.bindPopup(popup_a8436be57d7dd66c337ed205cf64554e)
-        ;
-
-        
-    
-    
-            var circle_marker_31cdb76c3d36dea344472d5ae487777c = L.circleMarker(
-                [14.10981, 101.7281],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_c9d107f23a996579b75dd1d111781902 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_5b0f23f5f978074c842686dfd0567a7f = $(`<div id="html_5b0f23f5f978074c842686dfd0567a7f" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: ปราจีนบุรี</div>`)[0];
-                popup_c9d107f23a996579b75dd1d111781902.setContent(html_5b0f23f5f978074c842686dfd0567a7f);
-            
-        
-
-        circle_marker_31cdb76c3d36dea344472d5ae487777c.bindPopup(popup_c9d107f23a996579b75dd1d111781902)
-        ;
-
-        
-    
-    
-            var circle_marker_f28d5918c3882b4801c24572f1801d36 = L.circleMarker(
-                [14.10998, 101.72549],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_8e79878f3f3da532981aee6c52f190a5 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_a35c0bee1c35d3a2143512c6180a62df = $(`<div id="html_a35c0bee1c35d3a2143512c6180a62df" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: ปราจีนบุรี</div>`)[0];
-                popup_8e79878f3f3da532981aee6c52f190a5.setContent(html_a35c0bee1c35d3a2143512c6180a62df);
-            
-        
-
-        circle_marker_f28d5918c3882b4801c24572f1801d36.bindPopup(popup_8e79878f3f3da532981aee6c52f190a5)
-        ;
-
-        
-    
-    
-            var circle_marker_d616f2060969fb8bcbdad67c5aeed7d6 = L.circleMarker(
-                [19.59476, 100.19906],
-                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_6e703c313224ac77ee7a67f2c8c32bb7 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_4a75f59f7cb2fe05be1a882344b51b04 = $(`<div id="html_4a75f59f7cb2fe05be1a882344b51b04" style="width: 100.0%; height: 100.0%;">Region: ภาคเหนือ<br>Province: พะเยา</div>`)[0];
-                popup_6e703c313224ac77ee7a67f2c8c32bb7.setContent(html_4a75f59f7cb2fe05be1a882344b51b04);
-            
-        
-
-        circle_marker_d616f2060969fb8bcbdad67c5aeed7d6.bindPopup(popup_6e703c313224ac77ee7a67f2c8c32bb7)
-        ;
-
-        
-    
-    
-            var circle_marker_8d72948b113527c081d3ace95cde8348 = L.circleMarker(
-                [16.19131, 103.37595],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_5e468c306f9ea354360502fc3c7bf789 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_402d612bb489d44d09cc2d16629e5158 = $(`<div id="html_402d612bb489d44d09cc2d16629e5158" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: มหาสารคาม</div>`)[0];
-                popup_5e468c306f9ea354360502fc3c7bf789.setContent(html_402d612bb489d44d09cc2d16629e5158);
-            
-        
-
-        circle_marker_8d72948b113527c081d3ace95cde8348.bindPopup(popup_5e468c306f9ea354360502fc3c7bf789)
-        ;
-
-        
-    
-    
-            var circle_marker_2df68026391d5fdd3d1ee37ff05530af = L.circleMarker(
-                [16.51597, 104.43765],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_b4a224dbc2ffa957ea038f7faca79201 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_8d68e341a48bc0effc7744153d9dd1ff = $(`<div id="html_8d68e341a48bc0effc7744153d9dd1ff" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: มุกดาหาร</div>`)[0];
-                popup_b4a224dbc2ffa957ea038f7faca79201.setContent(html_8d68e341a48bc0effc7744153d9dd1ff);
-            
-        
-
-        circle_marker_2df68026391d5fdd3d1ee37ff05530af.bindPopup(popup_b4a224dbc2ffa957ea038f7faca79201)
-        ;
-
-        
-    
-    
-            var circle_marker_02a41ea55eef1716bc1f6ad31cc511ce = L.circleMarker(
-                [14.81855, 100.69111],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_9c5197cf39483d7114ffc1c272ebf7f5 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_8e125d4f64eeaedc479ec21ff10e05ff = $(`<div id="html_8e125d4f64eeaedc479ec21ff10e05ff" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: ลพบุรี</div>`)[0];
-                popup_9c5197cf39483d7114ffc1c272ebf7f5.setContent(html_8e125d4f64eeaedc479ec21ff10e05ff);
-            
-        
-
-        circle_marker_02a41ea55eef1716bc1f6ad31cc511ce.bindPopup(popup_9c5197cf39483d7114ffc1c272ebf7f5)
-        ;
-
-        
-    
-    
-            var circle_marker_a0f0643fe7d6623b723349598cc18ab2 = L.circleMarker(
-                [14.55711, 104.4773],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_13303f6c62979accf926d9cac188525f = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_52a0df583f6c4289c6d6147739ee1472 = $(`<div id="html_52a0df583f6c4289c6d6147739ee1472" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: ศรีสะเกษ</div>`)[0];
-                popup_13303f6c62979accf926d9cac188525f.setContent(html_52a0df583f6c4289c6d6147739ee1472);
-            
-        
-
-        circle_marker_a0f0643fe7d6623b723349598cc18ab2.bindPopup(popup_13303f6c62979accf926d9cac188525f)
-        ;
-
-        
-    
-    
-            var circle_marker_d194f8c1ec697f0217f256075ff49a3e = L.circleMarker(
-                [15.08049, 104.35967],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_07e25bde7713b8e7fd211cd4c77a34a6 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_b9d2d4d2288a1b2fcf5a4385442ce62d = $(`<div id="html_b9d2d4d2288a1b2fcf5a4385442ce62d" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: ศรีสะเกษ</div>`)[0];
-                popup_07e25bde7713b8e7fd211cd4c77a34a6.setContent(html_b9d2d4d2288a1b2fcf5a4385442ce62d);
-            
-        
-
-        circle_marker_d194f8c1ec697f0217f256075ff49a3e.bindPopup(popup_07e25bde7713b8e7fd211cd4c77a34a6)
-        ;
-
-        
-    
-    
-            var circle_marker_0fed64657a0d7d1607b406581dce096e = L.circleMarker(
-                [15.08163, 104.36208],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_38242998fc7b8dc74b9798733b5f22c1 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_4d57ec9580fd3e6435f7bd5c77e17aeb = $(`<div id="html_4d57ec9580fd3e6435f7bd5c77e17aeb" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: ศรีสะเกษ</div>`)[0];
-                popup_38242998fc7b8dc74b9798733b5f22c1.setContent(html_4d57ec9580fd3e6435f7bd5c77e17aeb);
-            
-        
-
-        circle_marker_0fed64657a0d7d1607b406581dce096e.bindPopup(popup_38242998fc7b8dc74b9798733b5f22c1)
-        ;
-
-        
-    
-    
-            var circle_marker_15b5baeaeeb89fc7350b2992a8749276 = L.circleMarker(
-                [14.62649, 101.00323],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_a8e8705b84a38705590f0260fb17e767 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_b9731bacc714b87c5a00a6091d3546bc = $(`<div id="html_b9731bacc714b87c5a00a6091d3546bc" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: สระบุรี</div>`)[0];
-                popup_a8e8705b84a38705590f0260fb17e767.setContent(html_b9731bacc714b87c5a00a6091d3546bc);
-            
-        
-
-        circle_marker_15b5baeaeeb89fc7350b2992a8749276.bindPopup(popup_a8e8705b84a38705590f0260fb17e767)
-        ;
-
-        
-    
-    
-            var circle_marker_3196bd4f50717339bc5b388129083ee3 = L.circleMarker(
-                [14.65066, 101.04008],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_c17c5e17ca7c9b4a2cd9629b5e7f9424 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_3e1679d907f333ded432f72cb4b7da3d = $(`<div id="html_3e1679d907f333ded432f72cb4b7da3d" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: สระบุรี</div>`)[0];
-                popup_c17c5e17ca7c9b4a2cd9629b5e7f9424.setContent(html_3e1679d907f333ded432f72cb4b7da3d);
-            
-        
-
-        circle_marker_3196bd4f50717339bc5b388129083ee3.bindPopup(popup_c17c5e17ca7c9b4a2cd9629b5e7f9424)
-        ;
-
-        
-    
-    
-            var circle_marker_6be6a931f49a9198703fd3b11acf02da = L.circleMarker(
-                [14.67735, 100.85134],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_3438c92e5aeac2b00361cb9606206c71 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_1851637d2cf86608a7628ad950700a00 = $(`<div id="html_1851637d2cf86608a7628ad950700a00" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: สระบุรี</div>`)[0];
-                popup_3438c92e5aeac2b00361cb9606206c71.setContent(html_1851637d2cf86608a7628ad950700a00);
-            
-        
-
-        circle_marker_6be6a931f49a9198703fd3b11acf02da.bindPopup(popup_3438c92e5aeac2b00361cb9606206c71)
-        ;
-
-        
-    
-    
-            var circle_marker_a514270513c5b2ff6f4263c3e416adf7 = L.circleMarker(
-                [14.64902, 101.01302],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_c35e7211f9db9112971d53fd611d2da0 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_78e892a7b80202beb6ced92d2c3f2487 = $(`<div id="html_78e892a7b80202beb6ced92d2c3f2487" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: สระบุรี</div>`)[0];
-                popup_c35e7211f9db9112971d53fd611d2da0.setContent(html_78e892a7b80202beb6ced92d2c3f2487);
-            
-        
-
-        circle_marker_a514270513c5b2ff6f4263c3e416adf7.bindPopup(popup_c35e7211f9db9112971d53fd611d2da0)
-        ;
-
-        
-    
-    
-            var circle_marker_9e572dc88daa60b78b7032b798f59ff6 = L.circleMarker(
-                [14.64929, 101.01117],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_d204d5ef6ffa2232eb37351d5662f8b6 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_3e9212d97639ced725b5228480a3a73a = $(`<div id="html_3e9212d97639ced725b5228480a3a73a" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: สระบุรี</div>`)[0];
-                popup_d204d5ef6ffa2232eb37351d5662f8b6.setContent(html_3e9212d97639ced725b5228480a3a73a);
-            
-        
-
-        circle_marker_9e572dc88daa60b78b7032b798f59ff6.bindPopup(popup_d204d5ef6ffa2232eb37351d5662f8b6)
-        ;
-
-        
-    
-    
-            var circle_marker_94aa6bd83f93d1e028fa0ae67aa345dd = L.circleMarker(
-                [13.68536, 102.34061],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_6f0df4f276dc930124414cf7156e8be0 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_c444c71f2642cb76000239d05f78d198 = $(`<div id="html_c444c71f2642cb76000239d05f78d198" style="width: 100.0%; height: 100.0%;">Region: ภาคตะวันออก<br>Province: สระแก้ว</div>`)[0];
-                popup_6f0df4f276dc930124414cf7156e8be0.setContent(html_c444c71f2642cb76000239d05f78d198);
-            
-        
-
-        circle_marker_94aa6bd83f93d1e028fa0ae67aa345dd.bindPopup(popup_6f0df4f276dc930124414cf7156e8be0)
-        ;
-
-        
-    
-    
-            var circle_marker_43071f294585b68ab1505f804da367a5 = L.circleMarker(
-                [13.81594, 102.39017],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_87d1f96f441d9bed5c8945c447e69221 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_1cd8497cb8854ef7d58610d054369c6f = $(`<div id="html_1cd8497cb8854ef7d58610d054369c6f" style="width: 100.0%; height: 100.0%;">Region: ภาคตะวันออก<br>Province: สระแก้ว</div>`)[0];
-                popup_87d1f96f441d9bed5c8945c447e69221.setContent(html_1cd8497cb8854ef7d58610d054369c6f);
-            
-        
-
-        circle_marker_43071f294585b68ab1505f804da367a5.bindPopup(popup_87d1f96f441d9bed5c8945c447e69221)
-        ;
-
-        
-    
-    
-            var circle_marker_9dbea2fd91dcd99fb3fba35480ac223d = L.circleMarker(
-                [14.78097, 100.45313],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_e2fcc446bbc3c1aadeb0f7c79162247c = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_a327be9004ed191e9787797aa7afe9fd = $(`<div id="html_a327be9004ed191e9787797aa7afe9fd" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: สิงห์บุรี</div>`)[0];
-                popup_e2fcc446bbc3c1aadeb0f7c79162247c.setContent(html_a327be9004ed191e9787797aa7afe9fd);
-            
-        
-
-        circle_marker_9dbea2fd91dcd99fb3fba35480ac223d.bindPopup(popup_e2fcc446bbc3c1aadeb0f7c79162247c)
-        ;
-
-        
-    
-    
-            var circle_marker_9cf74295640d538f2763f6b891bb60a9 = L.circleMarker(
-                [14.78532, 100.45258],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_537f71ed291d46ae7843d7a608064af5 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_261afbc50bdfb1329405f89f41da7f7d = $(`<div id="html_261afbc50bdfb1329405f89f41da7f7d" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: สิงห์บุรี</div>`)[0];
-                popup_537f71ed291d46ae7843d7a608064af5.setContent(html_261afbc50bdfb1329405f89f41da7f7d);
-            
-        
-
-        circle_marker_9cf74295640d538f2763f6b891bb60a9.bindPopup(popup_537f71ed291d46ae7843d7a608064af5)
-        ;
-
-        
-    
-    
-            var circle_marker_81f9963a10b75476c5f1551ce9ad0d0a = L.circleMarker(
-                [14.78712, 100.4545],
-                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_7cbfa191c5f527d9acbf82759b0b2a39 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_94d868bae5d2f26d2ee6b1a0eeb4a81a = $(`<div id="html_94d868bae5d2f26d2ee6b1a0eeb4a81a" style="width: 100.0%; height: 100.0%;">Region: ภาคกลาง<br>Province: สิงห์บุรี</div>`)[0];
-                popup_7cbfa191c5f527d9acbf82759b0b2a39.setContent(html_94d868bae5d2f26d2ee6b1a0eeb4a81a);
-            
-        
-
-        circle_marker_81f9963a10b75476c5f1551ce9ad0d0a.bindPopup(popup_7cbfa191c5f527d9acbf82759b0b2a39)
-        ;
-
-        
-    
-    
-            var circle_marker_a77f3f16bdd1b8b72397a2dda6e4bd6b = L.circleMarker(
-                [8.44239, 99.21523],
-                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_2fbac3846c9ef7967c8fe2106199f0e1 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_cbdf79622100f7029b94b1de4126439e = $(`<div id="html_cbdf79622100f7029b94b1de4126439e" style="width: 100.0%; height: 100.0%;">Region: ภาคใต้<br>Province: สุราษฎร์ธานี</div>`)[0];
-                popup_2fbac3846c9ef7967c8fe2106199f0e1.setContent(html_cbdf79622100f7029b94b1de4126439e);
-            
-        
-
-        circle_marker_a77f3f16bdd1b8b72397a2dda6e4bd6b.bindPopup(popup_2fbac3846c9ef7967c8fe2106199f0e1)
-        ;
-
-        
-    
-    
-            var circle_marker_541f9a140c969971c1fbdb10bdb1b363 = L.circleMarker(
-                [15.34721, 104.43685],
-                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 3}
-            ).addTo(map_b3f9637596d1ff06170ce0786e748eae);
-        
-    
-        var popup_6758079b5efe74c0387b256032af4f72 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_47940c790ab9970fda0740c4f5402e26 = $(`<div id="html_47940c790ab9970fda0740c4f5402e26" style="width: 100.0%; height: 100.0%;">Region: ภาคอีสาน<br>Province: อุบลราชธานี</div>`)[0];
-                popup_6758079b5efe74c0387b256032af4f72.setContent(html_47940c790ab9970fda0740c4f5402e26);
-            
-        
-
-        circle_marker_541f9a140c969971c1fbdb10bdb1b363.bindPopup(popup_6758079b5efe74c0387b256032af4f72)
-        ;
-
-        
-    
-</script>
 </html>
