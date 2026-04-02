@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio - GIS & Web Developer</title>
+    <style>
+        /* ตั้งค่าสีและรูปแบบพื้นฐาน */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --bg-color: #f4f6f8;
+            --text-color: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        /* ส่วนหัวของเว็บ (Header) */
+        header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        header h1 { margin: 0; font-size: 2.2rem; }
+        header p { margin: 10px 0 0; font-size: 1.1rem; color: #bdc3c7; }
+        
+        /* ส่วนเนื้อหา */
+        .container {
+            max-width: 900px;
+            margin: -30px auto 2rem; /* ดึงเนื้อหาให้ซ้อนกับ Header นิดนึงให้ดูมีมิติ */
+            padding: 0 1rem;
+        }
+        .profile-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        /* รูปแบบกล่องโปรเจกต์ */
+        h2 { text-align: center; color: var(--primary); }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* ปรับให้พอดีจอมือถืออัตโนมัติ */
+            gap: 20px;
+        }
+        .project-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            border-top: 4px solid var(--secondary);
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .project-card h3 { margin-top: 0; color: var(--primary); }
+        
+        /* ป้าย Tag บอกทักษะ */
+        .tags { margin: 10px 0 15px; }
+        .tag {
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            color: #495057;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        
+        /* ปุ่มกดดูผลงาน */
+        .btn {
+            display: block;
+            text-align: center;
+            padding: 10px 20px;
+            background-color: var(--secondary);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn:hover { background-color: #2980b9; }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>[ชื่อ - นามสกุล ของคุณ]</h1>
+        <p>Web Developer & Geospatial Data Analyst</p>
+    </header>
+
+    <div class="container">
+        <div class="profile-card">
+            <p>Welcome to my portfolio. I specialize in building data-driven solutions using <strong>Python, JavaScript, and PostgreSQL</strong>. Below are my interactive web GIS and spatial data analysis projects.</p>
+        </div>
+
+        <h2>My Projects</h2>
+        
+        <div class="projects-grid">
+            
+            <div class="project-card">
+                <h3>🔥 Hotspot Web GIS for Forest Fire</h3>
+                <div class="tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">Folium</span>
+                    <span class="tag">GeoPandas</span>
+                </div>
+                <p>Interactive web application for monitoring and visualizing forest fire hotspots using K-Means clustering.</p>
+                <a href="hotspot.html" class="btn">View Interactive Map</a>
+            </div>
+
+            <div class="project-card">
+                <h3>⚡ EV Charging Station Suitability</h3>
+                <div class="tags">
+                    <span class="tag">Spatial Database</span>
+                    <span class="tag">PostGIS</span>
+                    <span class="tag">Geovisualization</span>
+                </div>
+                <p>Site suitability analysis for EV charging stations in Chonburi to support infrastructure planning.</p>
+                <a href="ev-station.html" class="btn">View Interactive Map</a>
+            </div>
+
+            <div class="project-card">
+                <h3>🌊 Phytoplankton Variability via GEE</h3>
+                <div class="tags">
+                    <span class="tag">Google Earth Engine</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">Remote Sensing</span>
+                </div>
+                <p>Monitored environmental factors influencing phytoplankton changes over time using GEE.</p>
+                <a href="#" class="btn" style="background-color: #95a5a6;">Report Available Upon Request</a>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024-2026 [ชื่อของคุณ]. Built for Portfolio Showcase.</p>
+    </footer>
+
+</body>
+</html>
