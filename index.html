@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio - GIS & Web Developer</title>
     <style>
-        /* ตั้งค่าสีและรูปแบบพื้นฐาน */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -20,7 +19,6 @@
             padding: 0;
             line-height: 1.6;
         }
-        /* ส่วนหัวของเว็บ (Header) */
         header {
             background-color: var(--primary);
             color: white;
@@ -29,11 +27,9 @@
         }
         header h1 { margin: 0; font-size: 2.2rem; }
         header p { margin: 10px 0 0; font-size: 1.1rem; color: #bdc3c7; }
-        
-        /* ส่วนเนื้อหา */
         .container {
             max-width: 900px;
-            margin: -30px auto 2rem; /* ดึงเนื้อหาให้ซ้อนกับ Header นิดนึงให้ดูมีมิติ */
+            margin: -30px auto 2rem;
             padding: 0 1rem;
         }
         .profile-card {
@@ -44,12 +40,10 @@
             text-align: center;
             margin-bottom: 2rem;
         }
-        
-        /* รูปแบบกล่องโปรเจกต์ */
         h2 { text-align: center; color: var(--primary); }
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* ปรับให้พอดีจอมือถืออัตโนมัติ */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
         .project-card {
@@ -65,8 +59,6 @@
             box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
         .project-card h3 { margin-top: 0; color: var(--primary); }
-        
-        /* ป้าย Tag บอกทักษะ */
         .tags { margin: 10px 0 15px; }
         .tag {
             background: #e9ecef;
@@ -78,8 +70,6 @@
             display: inline-block;
             margin-bottom: 5px;
         }
-        
-        /* ปุ่มกดดูผลงาน */
         .btn {
             display: block;
             text-align: center;
@@ -92,7 +82,6 @@
             transition: background 0.3s;
         }
         .btn:hover { background-color: #2980b9; }
-        
         footer {
             text-align: center;
             padding: 2rem;
@@ -104,7 +93,7 @@
 <body>
 
     <header>
-        <h1>[ชื่อ - นามสกุล ของคุณ]</h1>
+        <h1>[ใส่ชื่อ - นามสกุลของคุณตรงนี้]</h1>
         <p>Web Developer & Geospatial Data Analyst</p>
     </header>
 
@@ -125,7 +114,7 @@
                     <span class="tag">GeoPandas</span>
                 </div>
                 <p>Interactive web application for monitoring and visualizing forest fire hotspots using K-Means clustering.</p>
-                <a href="hotspot.html" class="btn">View Interactive Map</a>
+                <a href="Fire_Forest/index.html" class="btn">View Interactive Map</a>
             </div>
 
             <div class="project-card">
@@ -136,11 +125,7 @@
                     <span class="tag">Geovisualization</span>
                 </div>
                 <p>Site suitability analysis for EV charging stations in Chonburi to support infrastructure planning.</p>
-                <a href="ev-station.html" class="btn">View Interactive Map</a>
-            </div>
-
-                <p>Monitored environmental factors influencing phytoplankton changes over time using GEE.</p>
-                <a href="#" class="btn" style="background-color: #95a5a6;">Report Available Upon Request</a>
+                <a href="EV_Station/index.html" class="btn">View Interactive Map</a>
             </div>
 
         </div>
