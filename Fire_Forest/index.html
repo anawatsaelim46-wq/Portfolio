@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Overview - Anawat Saelim</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 { margin: 0; color: #2c3e50; }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .back-btn:hover { background-color: #c0392b; }
+        .objective-box {
+            background-color: #eaf2f8;
+            border-left: 5px solid #3498db;
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+        .objective-box h3 { margin-top: 0; color: #2980b9; }
+        .map-container {
+            width: 100%;
+            height: 600px; /* ปรับความสูงของกรอบแผนที่ได้ตามต้องการ */
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="../index.html" class="back-btn">⬅ Back to Portfolio</a>
+
+        <div class="header">
+            <h1>🔥 Hotspot Web GIS for Forest Fire</h1>
+        </div>
+
+        <div class="objective-box">
+            <h3>🎯 วัตถุประสงค์ของการวิเคราะห์ (Project Objective)</h3>
+            <p>
+                โปรเจกต์นี้จัดทำขึ้นเพื่อวิเคราะห์และจัดกลุ่ม (Clustering) จุดความร้อน (Hotspot) ที่เกิดขึ้นในประเทศไทย 
+                โดยใช้ข้อมูลจากกรมป่าไม้ นำมาประมวลผลด้วย K-Means Algorithm แบ่งออกเป็น 5 กลุ่มหลัก 
+                เพื่อช่วยให้หน่วยงานที่เกี่ยวข้องสามารถมองเห็นภาพรวม เช็คความหนาแน่นเชิงพื้นที่ และวางแผนจัดการไฟป่าในแต่ละภูมิภาคได้อย่างมีประสิทธิภาพ
+            </p>
+        </div>
+
+        <h3>🗺️ Interactive Map Result</h3>
+        <div class="map-container">
+            <iframe src="map.html" title="Interactive Map"></iframe>
+        </div>
+    </div>
+
+</body>
+</html>
