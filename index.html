@@ -13,6 +13,7 @@
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
             --card-bg: #ffffff;
+            --border-color: #e1e8ed;
         }
 
         body {
@@ -67,18 +68,20 @@
             height: 150px;
             border-radius: 50%;
             object-fit: cover;
-            /* เพิ่มคำสั่งนี้เพื่อดันรูปขึ้น โฟกัสแค่หน้าถึงหน้าอก */
-            object-position: 50% 10%; 
+            /* --- แก้ไขตรงนี้: เขยิบรูปขึ้นสูงอีกนิด (เห็นหน้าถึงอกชัดขึ้น) --- */
+            object-position: 50% 2%; 
             border: 5px solid white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
             margin-bottom: 1.5rem;
         }
 
         .profile-summary {
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
             color: var(--text-main);
-            font-size: 1.1rem;
+            font-size: 1.05rem;
+            text-align: justify;
+            text-align-last: center;
         }
 
         .section-title {
@@ -118,14 +121,18 @@
         .project-card h3 {
             margin-top: 0;
             color: var(--primary-dark);
-            font-size: 1.4rem;
-            font-weight: 500;
+            font-size: 1.3rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 1rem;
         }
 
         .project-description {
             color: var(--text-muted);
             margin-bottom: 1.5rem;
             flex-grow: 1;
+            font-size: 0.95rem;
+            text-align: justify;
         }
 
         .tags {
@@ -136,38 +143,58 @@
             background: #e9ecef;
             padding: 5px 10px;
             border-radius: 4px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin-right: 8px;
             color: #495057;
             display: inline-block;
             margin-bottom: 8px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
         }
 
+        /* --- แก้ไขส่วนปุ่ม: จัดวางแบบ Flex คู่กัน --- */
         .btn-container {
             width: 100%;
             margin-top: auto;
+            display: flex;
+            gap: 10px; /* ระยะห่างระหว่างปุ่ม */
         }
 
         .btn {
+            flex: 1; /* ให้ทั้งสองปุ่มแชร์พื้นที่เท่ากันเป๊ะ */
             display: block;
-            width: 100%;
-            box-sizing: border-box;
             text-align: center;
-            padding: 12px 20px;
-            background-color: var(--primary-blue);
-            color: white;
+            padding: 12px 10px; /* ปรับ Padding นิดหน่อยให้พอดีตัวหนังสือ */
             text-decoration: none;
             border-radius: 4px;
             font-weight: bold;
             transition: background 0.3s;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-size: 0.8rem; /* ลดขนาดฟอนต์นิดนึงเพื่อให้ใส่สองปุ่มคู่กันได้พอดี */
             border: none;
+            box-sizing: border-box;
         }
 
-        .btn:hover {
+        /* สีปุ่ม Details (น้ำเงินหลัก) */
+        .btn-details {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        .btn-details:hover {
             background-color: var(--primary-dark);
+        }
+
+        /* สีปุ่ม Source Code (เทา/ขาว ดูเป็นทางการ) */
+        .btn-source {
+            background-color: #f1f3f5;
+            color: #495057;
+            border: 1px solid var(--border-color);
+        }
+        .btn-source:hover {
+            background-color: #e9ecef;
+            color: #212529;
         }
 
         footer {
@@ -186,6 +213,9 @@
             .container {
                 padding: 0 1rem;
             }
+            .btn-container {
+                flex-direction: column; /* บนมือถือให้ปุ่มเรียงต่อกันแนวดิ่ง */
+            }
         }
     </style>
 </head>
@@ -202,7 +232,7 @@
             <img src="profile.jpg" alt="Anawat Saelim Profile Picture" class="profile-img">
             <div class="profile-summary">
                 <p>
-                    I am a highly motivated Geospatial Data Analyst and Web Developer specializing in transforming complex data into actionable insights through interactive visualizations and spatial database management. My expertise lies in leveraging <strong>Python, JavaScript, and PostgreSQL</strong> to build data-driven solutions. Below is a showcase of my analytical and development projects.
+                    A results-oriented Geospatial Data Analyst with a strong foundation in transforming complex spatial datasets into actionable intelligence. Proficient in designing interactive geovisualizations and managing advanced spatial databases. Core technical competencies include <strong>Python, JavaScript, and PostgreSQL (PostGIS)</strong>. This portfolio demonstrates applied methodologies in spatial analysis, geospatial modeling, and data-driven solution development.
                 </p>
             </div>
         </div>
@@ -220,11 +250,12 @@
                         <span class="tag">GeoPandas</span>
                     </div>
                     <p class="project-description">
-                        Developed an interactive web application to visualize and monitor forest fire hotspots across Thailand. The project implements K-Means clustering to analyze spatial density and prioritize response efforts for effective fire management.
+                        Engineered an interactive Web GIS application for the systematic visualization and monitoring of forest fire hotspots in Thailand. The methodology incorporates K-Means clustering algorithms to evaluate spatial density, thereby facilitating data-informed decision-making for disaster response and strategic resource allocation.
                     </p>
                 </div>
                 <div class="btn-container">
-                    <a href="Fire_Forest/index.html" class="btn">View Project Details</a>
+                    <a href="Fire_Forest/index.html" class="btn btn-details">Project Overview</a>
+                    <a href="https://github.com/bosss3113/Portfolio/tree/main/Fire_Forest" target="_blank" class="btn btn-source">Source Code</a>
                 </div>
             </div>
 
@@ -237,11 +268,12 @@
                         <span class="tag">Geovisualization</span>
                     </div>
                     <p class="project-description">
-                        Conducted a comprehensive suitability analysis for locating new Electric Vehicle (EV) charging stations in Chonburi. The analysis integrates environmental, economic, and logistical factors within a PostGIS database.
+                        Executed a multi-criteria spatial suitability analysis to identify optimal locations for Electric Vehicle (EV) charging infrastructure in Chonburi province. The framework integrates environmental, economic, and logistical variables, utilizing PostGIS for advanced spatial database management and geoprocessing workflows.
                     </p>
                 </div>
                 <div class="btn-container">
-                    <a href="EV_Station/index.html" class="btn">View Project Details</a>
+                    <a href="EV_Station/index.html" class="btn btn-details">Project Overview</a>
+                    <a href="https://github.com/bosss3113/Portfolio/tree/main/EV_Station" target="_blank" class="btn btn-source">Source Code</a>
                 </div>
             </div>
 
