@@ -63,16 +63,23 @@
             margin-bottom: 3rem;
         }
 
-        .profile-img {
+        /* --- ปรับแต่งรูปโปรไฟล์ (ซูมเข้านิดหน่อย) --- */
+        .profile-img-container {
             width: 150px;
             height: 150px;
+            margin: 0 auto 1.5rem;
             border-radius: 50%;
-            object-fit: cover;
-            /* --- แก้ไขตรงนี้: เขยิบรูปขึ้นสูงอีกนิด (เห็นหน้าถึงอกชัดขึ้น) --- */
-            object-position: 50% 2%; 
+            overflow: hidden; /* บังคับให้รูปที่ซูมไม่ล้นขอบวงกลม */
             border: 5px solid white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-            margin-bottom: 1.5rem;
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: 50% 5%; /* ดันขึ้นเพื่อให้เห็นหน้าถึงอก */
+            transform: scale(1.25); /* ซูมรูปเข้าไป 25% */
         }
 
         .profile-summary {
@@ -153,48 +160,31 @@
             font-weight: bold;
         }
 
-        /* --- แก้ไขส่วนปุ่ม: จัดวางแบบ Flex คู่กัน --- */
         .btn-container {
             width: 100%;
             margin-top: auto;
-            display: flex;
-            gap: 10px; /* ระยะห่างระหว่างปุ่ม */
         }
 
         .btn {
-            flex: 1; /* ให้ทั้งสองปุ่มแชร์พื้นที่เท่ากันเป๊ะ */
             display: block;
+            width: 100%; /* กลับมาเป็นเต็มความกว้าง */
             text-align: center;
-            padding: 12px 10px; /* ปรับ Padding นิดหน่อยให้พอดีตัวหนังสือ */
+            padding: 12px 20px;
+            background-color: var(--primary-blue);
+            color: white;
             text-decoration: none;
             border-radius: 4px;
             font-weight: bold;
             transition: background 0.3s;
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-size: 0.8rem; /* ลดขนาดฟอนต์นิดนึงเพื่อให้ใส่สองปุ่มคู่กันได้พอดี */
+            font-size: 0.9rem;
             border: none;
             box-sizing: border-box;
         }
 
-        /* สีปุ่ม Details (น้ำเงินหลัก) */
-        .btn-details {
-            background-color: var(--primary-blue);
-            color: white;
-        }
-        .btn-details:hover {
+        .btn:hover {
             background-color: var(--primary-dark);
-        }
-
-        /* สีปุ่ม Source Code (เทา/ขาว ดูเป็นทางการ) */
-        .btn-source {
-            background-color: #f1f3f5;
-            color: #495057;
-            border: 1px solid var(--border-color);
-        }
-        .btn-source:hover {
-            background-color: #e9ecef;
-            color: #212529;
         }
 
         footer {
@@ -213,9 +203,6 @@
             .container {
                 padding: 0 1rem;
             }
-            .btn-container {
-                flex-direction: column; /* บนมือถือให้ปุ่มเรียงต่อกันแนวดิ่ง */
-            }
         }
     </style>
 </head>
@@ -229,7 +216,9 @@
     <div class="container">
         
         <div class="profile-section">
-            <img src="profile.jpg" alt="Anawat Saelim Profile Picture" class="profile-img">
+            <div class="profile-img-container">
+                <img src="profile.jpg" alt="Anawat Saelim Profile Picture" class="profile-img">
+            </div>
             <div class="profile-summary">
                 <p>
                     A results-oriented Geospatial Data Analyst with a strong foundation in transforming complex spatial datasets into actionable intelligence. Proficient in designing interactive geovisualizations and managing advanced spatial databases. Core technical competencies include <strong>Python, JavaScript, and PostgreSQL (PostGIS)</strong>. This portfolio demonstrates applied methodologies in spatial analysis, geospatial modeling, and data-driven solution development.
@@ -254,8 +243,7 @@
                     </p>
                 </div>
                 <div class="btn-container">
-                    <a href="Fire_Forest/index.html" class="btn btn-details">Project Overview</a>
-                    <a href="https://github.com/bosss3113/Portfolio/tree/main/Fire_Forest" target="_blank" class="btn btn-source">Source Code</a>
+                    <a href="Fire_Forest/index.html" class="btn">Project Overview</a>
                 </div>
             </div>
 
@@ -272,8 +260,7 @@
                     </p>
                 </div>
                 <div class="btn-container">
-                    <a href="EV_Station/index.html" class="btn btn-details">Project Overview</a>
-                    <a href="https://github.com/bosss3113/Portfolio/tree/main/EV_Station" target="_blank" class="btn btn-source">Source Code</a>
+                    <a href="EV_Station/index.html" class="btn">Project Overview</a>
                 </div>
             </div>
 
