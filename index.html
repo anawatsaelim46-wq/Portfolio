@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Portfolio - Anawat Saelim</title>
+    <title>Portfolio - Anawat Saelim</title>
     <style>
-        /* ตั้งค่าสีและรูปแบบพื้นฐานแบบทางการ */
         :root {
-            --primary-dark: #1a252f; /* Navy/Dark Grey */
-            --primary-blue: #2980b9; /* Professional Blue */
+            --primary-dark: #1a252f;
+            --primary-blue: #2980b9;
             --secondary-blue: #3498db;
             --bg-color: #f8f9fa;
             --text-main: #2c3e50;
@@ -17,7 +16,7 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Font ดูทางการกว่า */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
@@ -25,7 +24,6 @@
             line-height: 1.6;
         }
 
-        /* ส่วนหัวของเว็บ (Header) */
         header {
             background-color: var(--primary-dark);
             color: white;
@@ -38,7 +36,7 @@
             font-size: 2.5rem;
             text-transform: uppercase;
             letter-spacing: 3px;
-            font-weight: 300; /* ดูเบาและหรูหรากว่า */
+            font-weight: 300;
         }
 
         header p {
@@ -49,14 +47,12 @@
             letter-spacing: 1px;
         }
 
-        /* ส่วนเนื้อหาหลัก */
         .container {
             max-width: 1100px;
-            margin: -40px auto 3rem; /* ดึงขึ้นมาทับ Header นิดนึง */
+            margin: -40px auto 3rem;
             padding: 0 2rem;
         }
 
-        /* ส่วนแสดงรูปถ่ายและประวัติย่อ */
         .profile-section {
             background: var(--card-bg);
             padding: 3rem;
@@ -69,8 +65,10 @@
         .profile-img {
             width: 150px;
             height: 150px;
-            border-radius: 50%; /* รูปวงกลม */
+            border-radius: 50%;
             object-fit: cover;
+            /* เพิ่มคำสั่งนี้เพื่อดันรูปขึ้น โฟกัสแค่หน้าถึงหน้าอก */
+            object-position: 50% 10%; 
             border: 5px solid white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
             margin-bottom: 1.5rem;
@@ -83,7 +81,6 @@
             font-size: 1.1rem;
         }
 
-        /* หัวข้อผลงาน */
         .section-title {
             text-align: center;
             color: var(--primary-dark);
@@ -93,14 +90,12 @@
             font-size: 1.8rem;
         }
 
-        /* รูปแบบ Grid สำหรับโปรเจกต์ (ปรับให้เท่ากัน) */
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 25px;
         }
 
-        /* กล่องโปรเจกต์ (ปรับเป็น Flexbox เพื่อดันปุ่มไปด้านล่างสุดให้เท่ากัน) */
         .project-card {
             background: var(--card-bg);
             border-radius: 8px;
@@ -109,9 +104,9 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border-top: 5px solid var(--primary-blue);
             display: flex;
-            flex-direction: column; /* จัดองค์ประกอบแบบแนวตั้ง */
-            justify-content: space-between; /* ดันองค์ประกอบสุดท้ายไปล่างสุด */
-            height: 100%; /* ให้ความสูงเต็มกรอบ Grid */
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
             box-sizing: border-box;
         }
 
@@ -130,10 +125,9 @@
         .project-description {
             color: var(--text-muted);
             margin-bottom: 1.5rem;
-            flex-grow: 1; /* ให้คำอธิบายกินพื้นที่ส่วนเกิน เพื่อดันปุ่มไปล่างสุด */
+            flex-grow: 1;
         }
 
-        /* ป้าย Tag ทักษะ */
         .tags {
             margin: 0 0 1.5rem;
         }
@@ -150,16 +144,15 @@
             text-transform: uppercase;
         }
 
-        /* ปุ่มกดดูผลงาน (ปรับปรุงให้เท่ากัน) */
         .btn-container {
             width: 100%;
-            margin-top: auto; /* ดันปุ่มไปด้านล่างสุดของ Card */
+            margin-top: auto;
         }
 
         .btn {
-            display: block; /* เป็น Block Level เพื่อให้กินพื้นที่เต็มความกว้าง container */
-            width: 100%; /* กำหนดความกว้างเต็ม 100% */
-            box-sizing: border-box; /* สำคัญมาก: ให้ padding รวมอยู่ใน width */
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
             text-align: center;
             padding: 12px 20px;
             background-color: var(--primary-blue);
@@ -177,7 +170,6 @@
             background-color: var(--primary-dark);
         }
 
-        /* ส่วนท้าย (Footer) */
         footer {
             text-align: center;
             padding: 3rem;
@@ -187,7 +179,6 @@
             margin-top: 2rem;
         }
 
-        /* รองรับมือถือ */
         @media (max-width: 768px) {
             .projects-grid {
                 grid-template-columns: 1fr;
