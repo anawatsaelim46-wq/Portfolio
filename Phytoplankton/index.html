@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phytoplankton Variability Monitoring - Anawat Saelim</title>
+<style>
+  :root {
+    --primary-dark: #1a252f;
+    --primary-blue: #2980b9;
+    --secondary-blue: #3498db;
+    --accent-green: #22c55e;
+    --bg-color: #f4f6f8;
+    --text-main: #2c3e50;
+    --text-muted: #7f8c8d;
+    --card-bg: #ffffff;
+    --border-color: #e1e8ed;
+    --code-bg: #1e293b;
+    --code-text: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  .back-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 8px 15px;
+    background-color: #34495e;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+  .back-btn:hover { background-color: #2c3e50; }
+
+  .header {
+    border-bottom: 2px solid var(--accent-green);
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    margin: 0;
+    color: var(--primary-dark);
+    font-size: 1.7rem;
+    line-height: 1.3;
+  }
+  .header .subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  h2 {
+    color: var(--primary-dark);
+    margin-top: 36px;
+    margin-bottom: 14px;
+    font-size: 1.3rem;
+    border-left: 4px solid var(--accent-green);
+    padding-left: 12px;
+  }
+
+  .objective-box {
+    background-color: #ecfdf5;
+    border-left: 5px solid var(--accent-green);
+    padding: 16px 22px;
+    border-radius: 4px;
+    margin-bottom: 24px;
+  }
+  .objective-box h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #15803d;
+    font-size: 1.05rem;
+  }
+  .objective-box p {
+    margin: 0;
+    text-align: justify;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    margin: 14px 0;
+  }
+  .data-table th, .data-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .data-table thead {
+    background-color: #f1f5f9;
+  }
+  .data-table th {
+    font-weight: 600;
+    color: var(--primary-dark);
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.6px;
+  }
+  .data-table code {
+    background: #eef2f6;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+
+  .workflow {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 16px 20px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.85rem;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--text-main);
+  }
+
+  .iframe-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  .iframe-row input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: 'Consolas', monospace;
+  }
+  .iframe-row button {
+    padding: 8px 20px;
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+  .iframe-row button:hover { background: var(--primary-dark); }
+
+  .map-container {
+    width: 100%;
+    height: 600px;
+    border: 2px solid #bdc3c7;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+  }
+  .map-container iframe { width: 100%; height: 100%; border: none; }
+
+  .code-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin: 16px 0 0;
+  }
+  .tab {
+    padding: 9px 16px;
+    background: #e2e8f0;
+    border: none;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .tab:hover { background: #cbd5e1; }
+  .tab.active {
+    background: var(--code-bg);
+    color: var(--code-text);
+  }
+
+  .code-block {
+    position: relative;
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 0 6px 6px 6px;
+    overflow: hidden;
+    margin-bottom: 30px;
+  }
+  .code-block pre {
+    margin: 0;
+    padding: 18px;
+    overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .code-block code { color: var(--code-text); }
+  .copy-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    padding: 6px 14px;
+    background: var(--accent-green);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: bold;
+    z-index: 2;
+  }
+  .copy-btn:hover { background: #16a34a; }
+  .copy-btn.copied { background: #15803d; }
+
+  .steps {
+    counter-reset: step;
+    padding: 0;
+    list-style: none;
+  }
+  .steps li {
+    counter-increment: step;
+    margin-bottom: 12px;
+    padding: 12px 14px 12px 50px;
+    background: #f8fafc;
+    border-left: 3px solid var(--primary-blue);
+    border-radius: 4px;
+    position: relative;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    width: 26px;
+    height: 26px;
+    background: var(--primary-blue);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+
+  .tag-row { margin-top: 14px; }
+  .tag {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 18px; }
+    .header h1 { font-size: 1.3rem; }
+    .iframe-row { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="../index.html" class="back-btn">← Back to Main Portfolio</a>
+
+  <div class="header">
+    <h1>Monitoring Environmental Factors Influencing Phytoplankton Variability</h1>
+    <p class="subtitle">Google Earth Engine · Remote Sensing · Sentinel-2 · MODIS-Aqua</p>
+    <div class="tag-row">
+      <span class="tag">Google Earth Engine</span>
+      <span class="tag">Remote Sensing</span>
+      <span class="tag">Sentinel-2</span>
+      <span class="tag">MODIS</span>
+      <span class="tag">Time Series</span>
+      <span class="tag">Geovisualization</span>
+    </div>
+  </div>
+
+  <div class="objective-box">
+    <h3>Project Objective (วัตถุประสงค์)</h3>
+    <p>
+      Utilized <strong>Google Earth Engine (GEE)</strong> to analyze and monitor
+      environmental variables affecting phytoplankton changes over time using
+      remote-sensing data. The analysis tracks <strong>Chlorophyll-a</strong>
+      (proxy for phytoplankton biomass) alongside its physical drivers — Sea
+      Surface Temperature, PAR, wind, and precipitation — over the
+      <strong>Upper Gulf of Thailand</strong> at 4.6 km, and inside the
+      <strong>Bangkok</strong> province inland waters at 10 m using Sentinel-2
+      NDCI. โปรเจกต์ใช้ GEE วิเคราะห์ปัจจัยแวดล้อมที่ส่งผลต่อความผันแปรของ
+      แพลงก์ตอนพืชจากภาพถ่ายดาวเทียม ครอบคลุมทั้งระดับอ่าวไทยและในแม่น้ำ/คลอง
+      กรุงเทพมหานคร
+    </p>
+  </div>
+
+  <h2>Methodology Workflow</h2>
+  <div class="workflow">Filter by AOI &amp; date
+        │
+Monthly compositing (mean / sum)
+        │
+        ├─► Period-mean maps (climatology)
+        │
+        ├─► Time-series charts (AOI spatial mean per month)
+        │
+        ├─► Seasonality (month-of-year)
+        │
+        ├─► Anomaly map (latest month − climatology)
+        │
+        └─► Per-pixel Pearson correlation per driver</div>
+
+  <h2>Data Sources</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th>Variable</th><th>GEE Dataset</th><th>Resolution</th><th>Cadence</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Chlorophyll-a (open sea)</td><td><code>NASA/OCEANDATA/MODIS-Aqua/L3SMI</code></td><td>~4.6 km</td><td>8-day</td></tr>
+      <tr><td>Chlorophyll-a (inland 10 m)</td><td><code>COPERNICUS/S2_SR_HARMONIZED</code></td><td>10 m</td><td>5-day</td></tr>
+      <tr><td>Sea Surface Temperature</td><td><code>NASA/OCEANDATA/MODIS-Aqua/L3SMI</code></td><td>~4.6 km</td><td>8-day</td></tr>
+      <tr><td>PAR (light)</td><td><code>NASA/OCEANDATA/MODIS-Aqua/L3SMI</code></td><td>~4.6 km</td><td>8-day</td></tr>
+      <tr><td>Wind &amp; air temperature</td><td><code>ECMWF/ERA5/MONTHLY</code></td><td>~28 km</td><td>monthly</td></tr>
+      <tr><td>Precipitation</td><td><code>UCSB-CHG/CHIRPS/DAILY</code></td><td>~5 km</td><td>daily</td></tr>
+      <tr><td>Bangkok boundary</td><td><code>FAO/GAUL/2015/level1</code></td><td>vector</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Interactive Web Application</h2>
+  <p>
+    Paste your published GEE App URL below to embed the live monitor.
+    See "How to Run" → step 4 for publishing instructions.
+  </p>
+  <div class="iframe-row">
+    <input type="text" id="gee-url"
+           value="https://YOUR-USERNAME.users.earthengine.app/view/bkk-phytoplankton"
+           placeholder="https://your-name.users.earthengine.app/view/your-app">
+    <button onclick="loadIframe()">Load App</button>
+  </div>
+  <div class="map-container" id="map-host">
+    <p style="text-align:center;">
+      Paste your published GEE App URL above &amp; click <strong>Load App</strong>.<br>
+      Until then, run the source code below directly in the GEE Code Editor.
+    </p>
+  </div>
+
+  <h2>Source Code (3 scripts — choose a tab)</h2>
+  <div class="code-tabs">
+    <button class="tab active" data-target="main" onclick="showCode('main', event)">Gulf of Thailand · MODIS (4.6 km)</button>
+    <button class="tab" data-target="bkk" onclick="showCode('bkk', event)">Bangkok · Sentinel-2 (10 m)</button>
+    <button class="tab" data-target="app" onclick="showCode('app', event)">Interactive App (UI)</button>
+  </div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode()" id="copy-btn">Copy code</button>
+    <pre><code id="code-display"></code></pre>
+  </div>
+
+  <h2>How to Run</h2>
+  <ol class="steps">
+    <li>Sign up for a free Google Earth Engine account at
+        <a href="https://earthengine.google.com/signup/" target="_blank">earthengine.google.com/signup</a>.</li>
+    <li>Open the
+        <a href="https://code.earthengine.google.com" target="_blank">GEE Code Editor</a>.</li>
+    <li>Pick a tab above, click <strong>Copy code</strong>, then paste into
+        a new GEE script. Save &amp; Run.</li>
+    <li>To publish as a web app: <strong>Apps → New App → Public</strong>.
+        Copy the resulting URL and paste it into the box above to embed it
+        on this page.</li>
+    <li>To export results, open the <strong>Tasks</strong> tab in GEE and
+        run the CSV / GeoTIFF exports.</li>
+  </ol>
+
+  <h2>Resume / Portfolio One-liner</h2>
+  <p style="background:#f8fafc;padding:14px 18px;border-left:4px solid var(--primary-blue);border-radius:4px;font-style:italic;">
+    Utilized Google Earth Engine (GEE) to analyze and monitor environmental
+    variables (SST, PAR, wind, precipitation) affecting phytoplankton (Chl-a)
+    variability over the Upper Gulf of Thailand and Bangkok inland waters,
+    involving multi-sensor remote-sensing data fusion (MODIS-Aqua,
+    Sentinel-2, ERA5, CHIRPS), monthly compositing, time-series analysis,
+    and per-pixel Pearson correlation mapping.
+  </p>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     EMBEDDED GEE SCRIPTS (rendered into the code viewer below)
+     ════════════════════════════════════════════════════════════════ -->
+
+<script type="text/plain" id="src-main">
+// ═══════════════════════════════════════════════════════════════════
+//  Monitoring Environmental Factors Influencing Phytoplankton Variability
+//  Study area: Upper Gulf of Thailand (Bight of Bangkok)
+//  Run in: Google Earth Engine Code Editor (https://code.earthengine.google.com)
+//
+//  Data:
+//    • MODIS-Aqua L3SMI ........ Chl-a, SST, PAR (ocean color, 4 km, 8-day)
+//    • ECMWF/ERA5/MONTHLY ...... 10-m wind components, air temperature
+//    • UCSB-CHG/CHIRPS/DAILY ... precipitation (5 km)
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── 1. CONFIG ─────────────────────────────────────────────────────
+var CONFIG = {
+  aoi: ee.Geometry.Rectangle([99.8, 12.4, 101.6, 13.7]),
+  startDate: '2019-01-01',
+  endDate:   '2024-12-31',
+  scale:     4638
+};
+
+Map.setOptions('SATELLITE');
+Map.centerObject(CONFIG.aoi, 8);
+Map.addLayer(CONFIG.aoi, {color: 'red'}, 'Study area', false);
+
+// ─── 2. LOAD COLLECTIONS ───────────────────────────────────────────
+var modis = ee.ImageCollection('NASA/OCEANDATA/MODIS-Aqua/L3SMI')
+  .filterDate(CONFIG.startDate, CONFIG.endDate);
+
+var chlor = modis.select('chlor_a');
+var sst   = modis.select('sst');
+var par   = modis.select('par');
+
+var era5 = ee.ImageCollection('ECMWF/ERA5/MONTHLY')
+  .filterDate(CONFIG.startDate, CONFIG.endDate);
+
+var wind = era5.map(function(img) {
+  return img.select('u_component_of_wind_10m')
+    .hypot(img.select('v_component_of_wind_10m'))
+    .rename('wind_speed')
+    .copyProperties(img, ['system:time_start']);
+});
+
+var airT = era5.select('mean_2m_air_temperature')
+  .map(function(img) { return img.subtract(273.15).rename('air_temp')
+    .copyProperties(img, ['system:time_start']); });
+
+var precip = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY')
+  .filterDate(CONFIG.startDate, CONFIG.endDate)
+  .select('precipitation');
+
+// ─── 3. MONTHLY COMPOSITES ─────────────────────────────────────────
+var start = ee.Date(CONFIG.startDate);
+var end   = ee.Date(CONFIG.endDate);
+var nMonths = end.difference(start, 'month').round();
+var months  = ee.List.sequence(0, nMonths.subtract(1));
+
+function monthlyComposite(coll, bandName, reducer) {
+  reducer = reducer || ee.Reducer.mean();
+  return ee.ImageCollection.fromImages(
+    months.map(function(m) {
+      var s = start.advance(m, 'month');
+      var e = s.advance(1, 'month');
+      var img = coll.filterDate(s, e).reduce(reducer).rename(bandName);
+      return img.set({
+        'system:time_start': s.millis(),
+        'month': s.format('YYYY-MM')
+      });
+    })
+  );
+}
+
+var mChlor  = monthlyComposite(chlor,  'chlor_a');
+var mSST    = monthlyComposite(sst,    'sst');
+var mPAR    = monthlyComposite(par,    'par');
+var mWind   = monthlyComposite(wind,   'wind_speed');
+var mAirT   = monthlyComposite(airT,   'air_temp');
+var mPrecip = monthlyComposite(precip, 'precipitation', ee.Reducer.sum());
+
+// ─── 4. MAP LAYERS ─────────────────────────────────────────────────
+var chlorVis = {min: 0.1, max: 10, palette:
+  ['#0d0887','#5c01a6','#9c179e','#cb4778','#ed7953','#fb9f3a','#fdca26','#f0f921']};
+var sstVis   = {min: 26, max: 32, palette:
+  ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']};
+var windVis  = {min: 0, max: 10, palette:
+  ['#ffffff','#a6cee3','#1f78b4','#08306b']};
+
+Map.addLayer(mChlor.mean().clip(CONFIG.aoi),  chlorVis, 'Chl-a (period mean, mg/m^3)');
+Map.addLayer(mSST.mean().clip(CONFIG.aoi),    sstVis,   'SST (period mean, C)', false);
+Map.addLayer(mWind.mean().clip(CONFIG.aoi),   windVis,  'Wind speed (mean, m/s)', false);
+
+var bloomFreq = mChlor.map(function(img) { return img.gt(3); })
+  .mean().rename('bloom_freq');
+Map.addLayer(bloomFreq.clip(CONFIG.aoi),
+  {min: 0, max: 1, palette: ['#ffffe0','#feb24c','#f03b20','#bd0026']},
+  'Bloom frequency', false);
+
+// ─── 5. TIME SERIES CHARTS ─────────────────────────────────────────
+function ts(coll, label, units, color) {
+  return ui.Chart.image.series({
+    imageCollection: coll,
+    region: CONFIG.aoi,
+    reducer: ee.Reducer.mean(),
+    scale: CONFIG.scale,
+    xProperty: 'system:time_start'
+  }).setOptions({
+    title: label + ' - Monthly mean over AOI',
+    vAxis: {title: units},
+    hAxis: {title: 'Date', format: 'YYYY-MM'},
+    lineWidth: 2, pointSize: 3,
+    series: {0: {color: color}}
+  });
+}
+
+print(ts(mChlor,  'Chlorophyll-a', 'mg/m3',    '#22c55e'));
+print(ts(mSST,    'SST',           'C',        '#ef4444'));
+print(ts(mPAR,    'PAR',           'E/m2/day', '#f59e0b'));
+print(ts(mWind,   'Wind speed',    'm/s',      '#3b82f6'));
+print(ts(mPrecip, 'Precipitation', 'mm/month', '#0ea5e9'));
+
+// ─── 6. CORRELATION (per-pixel, Pearson) ───────────────────────────
+function joinByDate(c1, c2) {
+  var filter = ee.Filter.equals({leftField: 'system:time_start',
+                                  rightField: 'system:time_start'});
+  return ee.ImageCollection(ee.Join.inner().apply(c1, c2, filter))
+    .map(function(f) {
+      return ee.Image.cat([ee.Image(f.get('primary')),
+                           ee.Image(f.get('secondary'))]);
+    });
+}
+
+function pearsonMap(coll1, coll2, layerName, show) {
+  var joined = joinByDate(coll1, coll2);
+  var corr = joined.reduce(ee.Reducer.pearsonsCorrelation())
+    .select('correlation');
+  Map.addLayer(corr.clip(CONFIG.aoi),
+    {min: -1, max: 1, palette: ['#2c7bb6','#ffffbf','#d7191c']},
+    layerName, show);
+  return corr;
+}
+
+pearsonMap(mChlor, mSST,    'Corr(Chl-a, SST)',     false);
+pearsonMap(mChlor, mPAR,    'Corr(Chl-a, PAR)',     false);
+pearsonMap(mChlor, mWind,   'Corr(Chl-a, Wind)',    false);
+pearsonMap(mChlor, mPrecip, 'Corr(Chl-a, Precip)',  false);
+
+// ─── 7. ANOMALY MAP ────────────────────────────────────────────────
+var climChlor = mChlor.mean();
+var latestChlor = mChlor.sort('system:time_start', false).first();
+var anomaly = ee.Image(latestChlor).subtract(climChlor).rename('chlor_anomaly');
+Map.addLayer(anomaly.clip(CONFIG.aoi),
+  {min: -3, max: 3, palette: ['#2c7bb6','white','#d7191c']},
+  'Chl-a anomaly (latest month)', false);
+
+// ─── 8. CSV EXPORT TO DRIVE ────────────────────────────────────────
+function tableFor(coll, label) {
+  return coll.map(function(img) {
+    var v = img.reduceRegion({
+      reducer: ee.Reducer.mean(),
+      geometry: CONFIG.aoi,
+      scale: CONFIG.scale,
+      maxPixels: 1e9
+    });
+    return ee.Feature(null, {
+      date:  ee.Date(img.get('system:time_start')).format('YYYY-MM'),
+      value: v.values().get(0),
+      var:   label
+    });
+  });
+}
+
+var allTS = tableFor(mChlor,'chlor_a')
+  .merge(tableFor(mSST,'sst'))
+  .merge(tableFor(mPAR,'par'))
+  .merge(tableFor(mWind,'wind_speed'))
+  .merge(tableFor(mPrecip,'precipitation'));
+
+Export.table.toDrive({
+  collection: allTS,
+  description: 'phytoplankton_monthly_timeseries',
+  fileFormat: 'CSV',
+  selectors: ['date','var','value']
+});
+
+print('READY - toggle layers, expand charts, run CSV export from Tasks tab.');
+</script>
+
+<script type="text/plain" id="src-bkk">
+// ═══════════════════════════════════════════════════════════════════
+//  Phytoplankton Variability - Bangkok inland waters @ 10 m
+//  Sensor: Sentinel-2 SR Harmonized
+//  Chl-a proxy: NDCI = (B5 - B4) / (B5 + B4)   [Mishra & Mishra, 2012]
+// ═══════════════════════════════════════════════════════════════════
+
+var CONFIG = {
+  startDate: '2022-01-01',
+  endDate:   '2024-12-31',
+  cloudPct:  40,
+  scale:     10
+};
+
+// Bangkok province boundary
+var bkk = ee.FeatureCollection('FAO/GAUL/2015/level1')
+  .filter(ee.Filter.or(
+    ee.Filter.eq('ADM1_NAME', 'Krung Thep Mahanakhon'),
+    ee.Filter.eq('ADM1_NAME', 'Bangkok Metropolis'),
+    ee.Filter.eq('ADM1_NAME', 'Bangkok')
+  ));
+var bkkGeom = bkk.geometry();
+
+Map.setOptions('SATELLITE');
+Map.centerObject(bkkGeom, 10);
+Map.addLayer(bkk, {color: 'red'}, 'Bangkok boundary');
+
+function maskS2(img) {
+  var scl = img.select('SCL');
+  var mask = scl.neq(3).and(scl.neq(8)).and(scl.neq(9)).and(scl.neq(10));
+  return img.updateMask(mask).divide(10000)
+    .copyProperties(img, ['system:time_start']);
+}
+
+function addIndices(img) {
+  var ndwi = img.normalizedDifference(['B3', 'B8']).rename('NDWI');
+  var ndci = img.normalizedDifference(['B5', 'B4']).rename('NDCI');
+  var waterMask = ndwi.gt(0);
+  var chlor = ndci.expression(
+    '14.039 + 86.115 * x + 194.325 * x * x', {'x': ndci}
+  ).rename('chlor_a').updateMask(waterMask);
+  return img.addBands([ndwi, ndci.updateMask(waterMask), chlor]);
+}
+
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterBounds(bkkGeom)
+  .filterDate(CONFIG.startDate, CONFIG.endDate)
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', CONFIG.cloudPct))
+  .map(maskS2)
+  .map(addIndices);
+
+print('Sentinel-2 scenes:', s2.size());
+
+// Monthly composites
+var start = ee.Date(CONFIG.startDate);
+var end   = ee.Date(CONFIG.endDate);
+var nMonths = end.difference(start, 'month').round();
+var months  = ee.List.sequence(0, nMonths.subtract(1));
+
+function monthly(coll, bandName) {
+  return ee.ImageCollection.fromImages(
+    months.map(function(m) {
+      var s = start.advance(m, 'month');
+      var e = s.advance(1, 'month');
+      var img = coll.filterDate(s, e).select(bandName).mean().rename(bandName);
+      return img.set('system:time_start', s.millis());
+    })
+  );
+}
+
+var mChlor = monthly(s2, 'chlor_a');
+var mNDCI  = monthly(s2, 'NDCI');
+
+// Visualization
+var chlorVis = {min: 0, max: 80, palette:
+  ['#0d0887','#5c01a6','#9c179e','#cb4778','#ed7953','#fdca26','#f0f921']};
+
+Map.addLayer(mChlor.mean().clip(bkkGeom), chlorVis,
+             'Chl-a (mg/m^3, period mean) [10 m]');
+
+var rgb = s2.median().select(['B4','B3','B2']).clip(bkkGeom);
+Map.addLayer(rgb, {min: 0, max: 0.3}, 'Sentinel-2 RGB (median)', false);
+
+// Time series
+print(ui.Chart.image.series({
+  imageCollection: mChlor,
+  region: bkkGeom,
+  reducer: ee.Reducer.mean(),
+  scale: 60,
+  xProperty: 'system:time_start'
+}).setOptions({
+  title: 'Chl-a (Sentinel-2 NDCI-derived) - BKK water pixels',
+  vAxis: {title: 'mg/m3'},
+  lineWidth: 2, pointSize: 3
+}));
+
+// Seasonality
+print(ui.Chart.image.seriesByRegion({
+  imageCollection: mChlor.map(function(img) {
+    return img.set('m', ee.Date(img.get('system:time_start')).get('month'));
+  }),
+  regions: bkk,
+  reducer: ee.Reducer.mean(),
+  scale: 60,
+  xProperty: 'm'
+}).setChartType('ColumnChart')
+  .setOptions({title: 'Chl-a seasonality (BKK)',
+               hAxis: {title: 'Month 1-12'},
+               vAxis: {title: 'mg/m3'}}));
+
+// Export GeoTIFF at 10 m
+Export.image.toDrive({
+  image: mChlor.mean().clip(bkkGeom).toFloat(),
+  description: 'bkk_chlor_a_periodmean_10m',
+  region: bkkGeom,
+  scale: 10,
+  maxPixels: 1e10,
+  fileFormat: 'GeoTIFF'
+});
+
+print('Run Tasks tab to export CSV / GeoTIFF.');
+</script>
+
+<script type="text/plain" id="src-app">
+// ═══════════════════════════════════════════════════════════════════
+//  Bangkok Phytoplankton Monitor - Publishable GEE App (10 m)
+//  Publish: Apps -> New App -> Public
+// ═══════════════════════════════════════════════════════════════════
+
+var STATE = {
+  startDate: '2023-01-01',
+  endDate:   '2024-12-31',
+  cloudPct:  40,
+  variable:  'chlor_a'
+};
+
+var bkk = ee.FeatureCollection('FAO/GAUL/2015/level1')
+  .filter(ee.Filter.or(
+    ee.Filter.eq('ADM1_NAME', 'Krung Thep Mahanakhon'),
+    ee.Filter.eq('ADM1_NAME', 'Bangkok Metropolis'),
+    ee.Filter.eq('ADM1_NAME', 'Bangkok')
+  ));
+var bkkGeom = bkk.geometry();
+
+function maskS2(img) {
+  var scl = img.select('SCL');
+  var mask = scl.neq(3).and(scl.neq(8)).and(scl.neq(9)).and(scl.neq(10));
+  return img.updateMask(mask).divide(10000)
+    .copyProperties(img, ['system:time_start']);
+}
+function addIndices(img) {
+  var ndwi = img.normalizedDifference(['B3', 'B8']).rename('NDWI');
+  var ndci = img.normalizedDifference(['B5', 'B4']).rename('NDCI');
+  var waterMask = ndwi.gt(0);
+  var chlor = ndci.expression(
+    '14.039 + 86.115 * x + 194.325 * x * x', {'x': ndci}
+  ).rename('chlor_a').updateMask(waterMask);
+  return img.addBands([ndwi, ndci.updateMask(waterMask), chlor]);
+}
+function loadS2() {
+  return ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+    .filterBounds(bkkGeom)
+    .filterDate(STATE.startDate, STATE.endDate)
+    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', STATE.cloudPct))
+    .map(maskS2)
+    .map(addIndices);
+}
+
+var VARS = {
+  'chlor_a': {label: 'Chlorophyll-a (mg/m3)',
+              vis: {min: 0, max: 80, palette:
+                    ['#0d0887','#5c01a6','#9c179e','#cb4778','#ed7953','#fdca26','#f0f921']}},
+  'NDCI':    {label: 'NDCI (Chl-a index)',
+              vis: {min: -0.2, max: 0.6, palette:
+                    ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c']}},
+  'NDWI':    {label: 'NDWI (water indicator)',
+              vis: {min: -0.3, max: 0.5, palette:
+                    ['#a52a2a','#f5deb3','#87ceeb','#4682b4','#000080']}}
+};
+
+ui.root.clear();
+var map = ui.Map();
+map.setOptions('SATELLITE');
+map.centerObject(bkkGeom, 10);
+
+var panel = ui.Panel({style: {width: '380px', padding: '16px',
+                              backgroundColor: '#0f1419'}});
+ui.root.add(ui.SplitPanel({firstPanel: panel, secondPanel: map}));
+
+panel.add(ui.Label('Bangkok Phytoplankton Monitor',
+  {fontSize: '20px', fontWeight: 'bold', color: '#22c55e',
+   backgroundColor: '#0f1419'}));
+panel.add(ui.Label('Sentinel-2 @ 10 m  ·  NDCI-derived Chl-a',
+  {fontSize: '11px', color: '#94a3b8', backgroundColor: '#0f1419',
+   margin: '0 0 14px 0'}));
+
+var varSelect = ui.Select({
+  items: Object.keys(VARS).map(function(k) {
+    return {label: VARS[k].label, value: k}; }),
+  value: STATE.variable,
+  onChange: function(v) { STATE.variable = v; },
+  style: {stretch: 'horizontal'}
+});
+panel.add(ui.Label('Variable', {fontSize: '12px', color: '#cbd5e1',
+                                backgroundColor: '#0f1419'}));
+panel.add(varSelect);
+
+var startBox = ui.Textbox({value: STATE.startDate,
+  style: {stretch: 'horizontal'},
+  onChange: function(v) { STATE.startDate = v; }});
+panel.add(ui.Label('Start date', {fontSize: '12px', color: '#cbd5e1',
+                                  backgroundColor: '#0f1419'}));
+panel.add(startBox);
+
+var endBox = ui.Textbox({value: STATE.endDate,
+  style: {stretch: 'horizontal'},
+  onChange: function(v) { STATE.endDate = v; }});
+panel.add(ui.Label('End date', {fontSize: '12px', color: '#cbd5e1',
+                                backgroundColor: '#0f1419'}));
+panel.add(endBox);
+
+panel.add(ui.Button({label: 'Update Map & Chart',
+  style: {stretch: 'horizontal', margin: '14px 0 4px 0'},
+  onClick: refresh}));
+
+panel.add(ui.Label('Time series - BKK mean',
+  {fontSize: '12px', fontWeight: 'bold', color: '#cbd5e1',
+   backgroundColor: '#0f1419', margin: '16px 0 4px 0'}));
+var chartHolder = ui.Panel({style: {backgroundColor: '#0f1419'}});
+panel.add(chartHolder);
+
+function monthlyComposite(coll, bandName) {
+  var s = ee.Date(STATE.startDate);
+  var e = ee.Date(STATE.endDate);
+  var n = e.difference(s, 'month').round();
+  var months = ee.List.sequence(0, n.subtract(1));
+  return ee.ImageCollection.fromImages(
+    months.map(function(m) {
+      var a = s.advance(m, 'month');
+      var b = a.advance(1, 'month');
+      var img = coll.filterDate(a, b).select(bandName).mean().rename(bandName);
+      return img.set('system:time_start', a.millis());
+    })
+  );
+}
+
+function refresh() {
+  map.layers().reset();
+  var coll = loadS2();
+  var monthly = monthlyComposite(coll, STATE.variable);
+  var def = VARS[STATE.variable];
+  map.addLayer(monthly.mean().clip(bkkGeom), def.vis,
+               def.label + ' - period mean');
+  map.addLayer(bkk.style({color: 'red', fillColor: '00000000', width: 2}),
+               {}, 'BKK boundary');
+
+  var chart = ui.Chart.image.series({
+    imageCollection: monthly,
+    region: bkkGeom,
+    reducer: ee.Reducer.mean(),
+    scale: 60,
+    xProperty: 'system:time_start'
+  }).setOptions({
+    title: def.label, lineWidth: 2, pointSize: 3,
+    backgroundColor: '#1e293b',
+    hAxis: {textStyle: {color: '#cbd5e1'}},
+    vAxis: {textStyle: {color: '#cbd5e1'}},
+    titleTextStyle: {color: '#e2e8f0'}
+  });
+  chartHolder.clear();
+  chartHolder.add(chart);
+}
+
+refresh();
+</script>
+
+<script>
+  // ─── Tab switching + Copy button ─────────────────────────────────
+  var currentTab = 'main';
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function getCode(id) {
+    var raw = document.getElementById('src-' + id).textContent;
+    // Trim outer blank lines
+    return raw.replace(/^\s*\n/, '').replace(/\s+$/, '');
+  }
+
+  function showCode(id, ev) {
+    currentTab = id;
+    var code = getCode(id);
+    document.getElementById('code-display').innerHTML = escapeHtml(code);
+    document.querySelectorAll('.tab').forEach(function(t) {
+      t.classList.toggle('active', t.dataset.target === id);
+    });
+  }
+
+  function copyCode() {
+    var code = getCode(currentTab);
+    navigator.clipboard.writeText(code).then(function() {
+      var btn = document.getElementById('copy-btn');
+      var orig = btn.textContent;
+      btn.textContent = '✓ Copied';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 1600);
+    });
+  }
+
+  function loadIframe() {
+    var url = document.getElementById('gee-url').value.trim();
+    if (!url || url.indexOf('YOUR-USERNAME') !== -1) {
+      alert('Paste your published GEE App URL first.\n' +
+            'Format: https://your-name.users.earthengine.app/view/your-app');
+      return;
+    }
+    var host = document.getElementById('map-host');
+    host.innerHTML = '';
+    var iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.title = 'GEE Phytoplankton Monitor';
+    host.appendChild(iframe);
+  }
+
+  // Init
+  showCode('main');
+</script>
+
+</body>
+</html>

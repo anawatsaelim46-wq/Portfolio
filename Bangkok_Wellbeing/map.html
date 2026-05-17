@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bangkok Urban Well-being WebGIS</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #0f1419;
+  --bg-panel: #1a2332;
+  --bg-card: #1e2b3d;
+  --accent-transit: #00d4ff;
+  --accent-food: #4ade80;
+  --accent-risk: #f97316;
+  --text-primary: #e8ecf1;
+  --text-secondary: #8899aa;
+  --text-muted: #556677;
+  --border: rgba(255,255,255,0.07);
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ─── HEADER ─── */
+#header {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 56px;
+  background: linear-gradient(135deg, #0d1520 0%, #162033 100%);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  backdrop-filter: blur(12px);
+}
+
+#header h1 {
+  font-family: 'Prompt', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent-transit), var(--accent-food));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.5px;
+}
+
+#header .subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 12px;
+  font-weight: 300;
+}
+
+.header-actions {
+  display: flex; gap: 8px; align-items: center;
+}
+
+.btn-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Sarabun'; font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.btn-tab:hover, .btn-tab.active {
+  background: rgba(0,212,255,0.1);
+  border-color: var(--accent-transit);
+  color: var(--accent-transit);
+}
+
+/* ─── MAP ─── */
+#map {
+  position: fixed;
+  top: 56px; left: 0; right: 360px; bottom: 0;
+  z-index: 1;
+}
+
+/* ─── SIDEBAR ─── */
+#sidebar {
+  position: fixed;
+  top: 56px; right: 0; bottom: 0;
+  width: 360px;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 500;
+  padding: 16px;
+}
+
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+
+.panel-section {
+  margin-bottom: 20px;
+}
+
+.panel-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Layer toggles */
+.layer-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 6px;
+  border: 1px solid transparent;
+}
+.layer-toggle:hover {
+  background: rgba(255,255,255,0.03);
+}
+.layer-toggle.active {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--border);
+}
+
+.layer-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.layer-icon.transit { background: rgba(0,212,255,0.15); }
+.layer-icon.food { background: rgba(74,222,128,0.15); }
+.layer-icon.risk { background: rgba(249,115,22,0.15); }
+
+.layer-info h4 {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-primary);
+}
+.layer-info p {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.toggle-switch {
+  width: 36px; height: 20px;
+  border-radius: 10px;
+  background: var(--text-muted);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--accent-transit); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: all 0.3s;
+}
+.toggle-switch.on::after { left: 18px; }
+
+/* Filter */
+.filter-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: 'Sarabun'; font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+.filter-select:focus {
+  border-color: var(--accent-transit);
+}
+
+/* Stats cards */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.stat-card .value {
+  font-family: 'Prompt', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.stat-card .label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+.stat-card.transit .value { color: var(--accent-transit); }
+.stat-card.food .value { color: var(--accent-food); }
+.stat-card.risk .value { color: var(--accent-risk); }
+.stat-card.neutral .value { color: var(--text-secondary); }
+
+/* District info card */
+.district-card {
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.district-card h3 {
+  font-family: 'Prompt', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.district-card .bar-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.district-card .bar-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  width: 60px;
+  flex-shrink: 0;
+}
+.district-card .bar-track {
+  flex: 1; height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.district-card .bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+.district-card .bar-value {
+  font-size: 11px;
+  font-weight: 600;
+  width: 45px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Legend */
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+.legend-dot {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Production panel */
+#production {
+  display: none;
+  position: fixed;
+  top: 56px; left: 0; right: 360px; bottom: 0;
+  background: var(--bg-dark);
+  z-index: 999;
+  overflow-y: auto;
+  padding: 32px 48px;
+}
+#production.show { display: block; }
+#production h2 {
+  font-family: 'Prompt', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, var(--accent-food), var(--accent-transit));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#production .sub {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+#production h3 {
+  font-family: 'Prompt'; font-size: 15px; font-weight: 600;
+  color: var(--accent-food);
+  margin: 22px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.prod-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.prod-summary .stat-card { text-align: left; padding: 14px; }
+.prod-summary .stat-card .value { font-size: 20px; }
+.prod-summary .stat-card .label { margin-top: 6px; }
+
+.cat-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 110px 90px;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.cat-row .cat-name { font-weight: 600; }
+.cat-row .cat-bar-track {
+  height: 8px; background: rgba(255,255,255,0.06);
+  border-radius: 4px; overflow: hidden;
+}
+.cat-row .cat-bar-fill {
+  height: 100%; border-radius: 4px;
+}
+.cat-row .cat-area { color: var(--text-muted); font-size: 11px; text-align: right; }
+.cat-row .cat-prod { font-weight: 700; font-family: 'Prompt'; text-align: right; }
+
+.prod-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+  margin-bottom: 16px;
+}
+.prod-table thead {
+  background: rgba(74,222,128,0.06);
+}
+.prod-table th, .prod-table td {
+  padding: 9px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.prod-table th {
+  font-family: 'Prompt'; font-weight: 600; font-size: 11px;
+  color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;
+}
+.prod-table tbody tr:last-child td { border-bottom: none; }
+.prod-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+.prod-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.prod-table .tag {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 600;
+}
+
+.method-note {
+  background: var(--bg-card);
+  border-left: 3px solid var(--text-muted);
+  padding: 10px 14px;
+  border-radius: 0 6px 6px 0;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 14px;
+}
+
+/* Popup styling */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+.leaflet-popup-tip { background: var(--bg-card) !important; }
+.leaflet-popup-content {
+  font-family: 'Sarabun', sans-serif !important;
+  font-size: 13px !important;
+  margin: 12px !important;
+}
+.popup-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 14px; font-weight: 600;
+  margin-bottom: 6px;
+}
+.popup-row {
+  display: flex; justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 12px;
+}
+.popup-row span:first-child { color: var(--text-muted); }
+.popup-row span:last-child { font-weight: 600; }
+.popup-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* Loading */
+#loading {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-dark);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s;
+}
+#loading.hide { opacity: 0; pointer-events: none; }
+.loader-ring {
+  width: 48px; height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent-transit);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading p {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  #sidebar { width: 100%; top: auto; bottom: 0; height: 50vh; left: 0; right: 0; }
+  #map { right: 0; bottom: 50vh; }
+  #production { right: 0; bottom: 50vh; padding: 20px; }
+  .prod-summary { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="loader-ring"></div>
+  <p>กำลังโหลดข้อมูลเชิงพื้นที่กรุงเทพมหานคร...</p>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <div style="display:flex;align-items:baseline;">
+    <h1>BKK Urban Well-being</h1>
+    <span class="subtitle">WebGIS Analysis — Transportation · Food · Disaster Risk</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn-tab active" onclick="showView('map')">🗺️ แผนที่</button>
+    <button class="btn-tab" onclick="showView('production')">🌾 ปริมาณการผลิต</button>
+  </div>
+</div>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- Production Calculator Panel -->
+<div id="production"></div>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <!-- Layers -->
+  <div class="panel-section">
+    <div class="panel-title">ชั้นข้อมูล (Layers)</div>
+    
+    <div class="layer-toggle active" id="layer-transit" onclick="toggleLayer('transit')">
+      <div class="layer-icon transit">🚆</div>
+      <div class="layer-info">
+        <h4>Transportation Accessibility</h4>
+        <p>สถานี BTS / MRT และเส้นทาง</p>
+      </div>
+      <div class="toggle-switch on" id="toggle-transit"></div>
+    </div>
+    
+    <div class="layer-toggle active" id="layer-food" onclick="toggleLayer('food')">
+      <div class="layer-icon food">🌾</div>
+      <div class="layer-info">
+        <h4>Food Accessibility</h4>
+        <p>พื้นที่เกษตรกรรม / แหล่งผลิตอาหาร</p>
+      </div>
+      <div class="toggle-switch on" id="toggle-food"></div>
+    </div>
+    
+    <div class="layer-toggle active" id="layer-risk" onclick="toggleLayer('risk')">
+      <div class="layer-icon risk">⚠️</div>
+      <div class="layer-info">
+        <h4>Disaster Risk</h4>
+        <p>พื้นที่เสี่ยงน้ำท่วม / พื้นที่ลุ่มต่ำ</p>
+      </div>
+      <div class="toggle-switch on" id="toggle-risk"></div>
+    </div>
+  </div>
+  
+  <!-- Filter -->
+  <div class="panel-section">
+    <div class="panel-title">ค้นหาเขต (Filter)</div>
+    <select class="filter-select" id="districtFilter" onchange="zoomToDistrict()">
+      <option value="">— เลือกเขต —</option>
+    </select>
+  </div>
+
+  <!-- Stats -->
+  <div class="panel-section" id="statsPanel">
+    <div class="panel-title">ภาพรวมกรุงเทพมหานคร</div>
+    <div class="stat-grid">
+      <div class="stat-card transit">
+        <div class="value" id="statTransit">139</div>
+        <div class="label">สถานีขนส่ง</div>
+      </div>
+      <div class="stat-card food">
+        <div class="value" id="statFood">50</div>
+        <div class="label">เขตมีพื้นที่เกษตร</div>
+      </div>
+      <div class="stat-card risk">
+        <div class="value" id="statRisk">—</div>
+        <div class="label">เขตเสี่ยงสูง</div>
+      </div>
+      <div class="stat-card neutral">
+        <div class="value" id="statDistricts">50</div>
+        <div class="label">เขตที่วิเคราะห์</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selected district info -->
+  <div class="panel-section" id="districtInfo" style="display:none;">
+    <div class="panel-title" id="districtInfoTitle">ข้อมูลเขต</div>
+    <div class="district-card" id="districtCardContent"></div>
+  </div>
+  
+  <!-- Legend -->
+  <div class="panel-section">
+    <div class="panel-title">สัญลักษณ์ (Legend)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-transit);border-radius:50%"></div> สถานี BTS</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a855f7;border-radius:50%"></div> สถานี MRT</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9;height:3px;border-radius:1px"></div> เส้นทางรถไฟฟ้า MRT</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(74,222,128,0.4)"></div> พื้นที่เกษตรกรรม</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(59,130,246,0.4)"></div> พื้นที่แหล่งน้ำ</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(249,115,22,0.4)"></div> พื้นที่เสี่ยง (พื้นที่ลุ่ม/ขยะ)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.08)"></div> ขอบเขตเขต</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ═══════════════════════════════════════════
+//  WebGIS Application
+// ═══════════════════════════════════════════
+
+// Bangkok center
+const BKK_CENTER = [13.75, 100.52];
+const BKK_ZOOM = 11;
+
+// Init map
+const map = L.map('map', {
+  center: BKK_CENTER,
+  zoom: BKK_ZOOM,
+  zoomControl: false
+});
+
+L.control.zoom({ position: 'topright' }).addTo(map);
+
+// Dark basemap
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© CartoDB © OpenStreetMap',
+  maxZoom: 19
+}).addTo(map);
+
+// Layer groups
+const layers = {
+  transit: L.layerGroup().addTo(map),
+  food: L.layerGroup().addTo(map),
+  risk: L.layerGroup().addTo(map),
+  districts: L.layerGroup().addTo(map),
+  boundary: L.layerGroup().addTo(map)
+};
+
+// State
+let districtStats = [];
+let districtGeoJSON = null;
+let foodFeatures = [];
+let activeView = 'map';
+const layerState = { transit: true, food: true, risk: true };
+
+// ═══ LULC → Yield lookup (kg/rai/year, Thai agronomy reference values) ═══
+// category: rice | vegetable | fruit | perennial | aquaculture | livestock | non_food
+const YIELD_TABLE = {
+  // Rice / Field crops
+  'Active paddy field':                 { yield: 450,  category: 'rice',        color: '#fbbf24', label: 'ข้าว' },
+  // Vegetables
+  'Truck crop':                         { yield: 3000, category: 'vegetable',   color: '#22c55e', label: 'ผัก' },
+  'Water spinach':                      { yield: 5000, category: 'vegetable',   color: '#22c55e', label: 'ผัก' },
+  'Water mimosa':                       { yield: 4000, category: 'vegetable',   color: '#22c55e', label: 'ผัก' },
+  'Lotus':                              { yield: 1200, category: 'vegetable',   color: '#22c55e', label: 'ผัก' },
+  // Fruits / Orchards
+  'Banana':                             { yield: 3500, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Banana/Floricultural/Ornamental plant':{ yield: 1750,category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Banana/Guava':                       { yield: 3250, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Banana/Jack fruit':                  { yield: 2750, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Banana/Lime':                        { yield: 2650, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Banana/Pomelo':                      { yield: 2750, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Bamboo/Banana':                      { yield: 2000, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Bamboo/Mango':                       { yield: 1100, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Coconut':                            { yield: 1200, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Coconut/Banana':                     { yield: 2350, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Coconut/Fish farm':                  { yield: 900,  category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Coconut/Lime':                       { yield: 1500, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Coconut/Mango':                      { yield: 1350, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Mango':                              { yield: 1500, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Mango/Banana':                       { yield: 2500, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Mango/Mangosteen':                   { yield: 1400, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Mango/Santol':                       { yield: 1300, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Lime':                               { yield: 1800, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Lime/Pomelo':                        { yield: 1900, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Pomelo':                             { yield: 2000, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Guava':                              { yield: 3000, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Orange':                             { yield: 2000, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Dragon fruit':                       { yield: 2000, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Marian plum':                        { yield: 1000, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Manila tamarind':                    { yield: 800,  category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Mixed orchard':                      { yield: 1800, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Mixed perennial':                    { yield: 1500, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Mixed perennial/Banana':             { yield: 2500, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  'Oil plam/Mixed orchard':             { yield: 2400, category: 'fruit',       color: '#f59e0b', label: 'ผลไม้' },
+  // Perennial (industrial / non-staple food)
+  'Oil palm':                           { yield: 3000, category: 'perennial',   color: '#a78bfa', label: 'พืชยืนต้น' },
+  'Oil palm/Coconut':                   { yield: 2100, category: 'perennial',   color: '#a78bfa', label: 'พืชยืนต้น' },
+  'Betel palm':                         { yield: 500,  category: 'perennial',   color: '#a78bfa', label: 'พืชยืนต้น' },
+  'Betel palm/Coconut':                 { yield: 850,  category: 'perennial',   color: '#a78bfa', label: 'พืชยืนต้น' },
+  'Integrated farm/Diversified farm':   { yield: 2000, category: 'perennial',   color: '#a78bfa', label: 'พืชยืนต้น' },
+  // Aquaculture
+  'Fish farm':                          { yield: 600,  category: 'aquaculture', color: '#38bdf8', label: 'ประมง' },
+  'Shrimp farm':                        { yield: 400,  category: 'aquaculture', color: '#38bdf8', label: 'ประมง' },
+  'Mixed aquacultural land':            { yield: 500,  category: 'aquaculture', color: '#38bdf8', label: 'ประมง' },
+  'Mixed aquatic plant':                { yield: 1200, category: 'aquaculture', color: '#38bdf8', label: 'ประมง' },
+  // Livestock
+  'Poultry  farm house':                { yield: 2000, category: 'livestock',   color: '#fb7185', label: 'ปศุสัตว์' },
+  'Poultry  farm house/Fish farm':      { yield: 1300, category: 'livestock',   color: '#fb7185', label: 'ปศุสัตว์' },
+  // Non-food (skipped from production totals)
+  'Floricultural/Ornamental plant':     { yield: 0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' },
+  'Grass plantation':                   { yield: 0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' },
+  'Pasture':                            { yield: 0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' },
+  'Bamboo':                             { yield: 0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' },
+  'Eucalyptus':                         { yield: 0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' },
+  'Acacia':                             { yield: 0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' },
+  'Teak':                               { yield: 0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' },
+  'Magosa':                             { yield: 0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' },
+  'Indian mahogany, Broad leaf  mahogany':{yield:0,    category: 'non_food',    color: '#64748b', label: 'ไม่ใช่อาหาร' }
+};
+
+const CATEGORY_META = {
+  rice:        { label: 'ข้าว',        color: '#fbbf24' },
+  vegetable:   { label: 'ผัก',         color: '#22c55e' },
+  fruit:       { label: 'ผลไม้',       color: '#f59e0b' },
+  perennial:   { label: 'พืชยืนต้น',   color: '#a78bfa' },
+  aquaculture: { label: 'ประมง',       color: '#38bdf8' },
+  livestock:   { label: 'ปศุสัตว์',    color: '#fb7185' },
+  non_food:    { label: 'ไม่ใช่อาหาร', color: '#64748b' }
+};
+
+function lookupYield(luType) {
+  if (YIELD_TABLE[luType]) return YIELD_TABLE[luType];
+  if (luType && luType.toLowerCase().startsWith('abandoned')) {
+    return { yield: 0, category: 'non_food', color: '#64748b', label: 'พื้นที่ทิ้งร้าง' };
+  }
+  return { yield: 0, category: 'non_food', color: '#64748b', label: 'อื่นๆ' };
+}
+
+// ═══ LAYER TOGGLE ═══
+function toggleLayer(name) {
+  layerState[name] = !layerState[name];
+  const toggle = document.getElementById('toggle-' + name);
+  const row = document.getElementById('layer-' + name);
+  
+  if (layerState[name]) {
+    map.addLayer(layers[name]);
+    toggle.classList.add('on');
+    row.classList.add('active');
+  } else {
+    map.removeLayer(layers[name]);
+    toggle.classList.remove('on');
+    row.classList.remove('active');
+  }
+}
+
+// ═══ VIEW TOGGLE ═══
+function showView(view) {
+  activeView = view;
+  document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+
+  if (view === 'map') {
+    document.querySelectorAll('.btn-tab')[0].classList.add('active');
+    document.getElementById('production').classList.remove('show');
+  } else {
+    document.querySelectorAll('.btn-tab')[1].classList.add('active');
+    renderProduction();
+    document.getElementById('production').classList.add('show');
+  }
+}
+
+// ═══ ZOOM TO DISTRICT ═══
+function zoomToDistrict() {
+  const val = document.getElementById('districtFilter').value;
+  if (!val || !districtGeoJSON) return;
+  
+  districtGeoJSON.eachLayer(layer => {
+    if (layer.feature.properties.AMPHOE_E === val) {
+      map.fitBounds(layer.getBounds(), { padding: [40, 40] });
+      showDistrictInfo(val);
+    }
+  });
+}
+
+function showDistrictInfo(districtName) {
+  const stat = districtStats.find(d => d.AMPHOE_E === districtName);
+  if (!stat) return;
+  
+  const panel = document.getElementById('districtInfo');
+  panel.style.display = 'block';
+  document.getElementById('districtInfoTitle').textContent = stat.AMPHOE_T + ' (' + stat.AMPHOE_E + ')';
+  
+  const maxTransit = Math.max(...districtStats.map(d => d.transit_stations)) || 1;
+  const maxFood = Math.max(...districtStats.map(d => d.food_access_pct)) || 1;
+  const maxFlood = Math.max(...districtStats.map(d => d.flood_risk_pct)) || 1;
+  
+  document.getElementById('districtCardContent').innerHTML = `
+    <h3 style="color:var(--text-primary)">${stat.AMPHOE_T}</h3>
+    <div class="bar-row">
+      <span class="bar-label" style="color:var(--accent-transit)">🚆 ขนส่ง</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(stat.transit_stations/maxTransit*100).toFixed(0)}%;background:var(--accent-transit)"></div></div>
+      <span class="bar-value" style="color:var(--accent-transit)">${stat.transit_stations} สถานี</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label" style="color:var(--accent-food)">🌾 เกษตร</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(stat.food_access_pct/maxFood*100).toFixed(0)}%;background:var(--accent-food)"></div></div>
+      <span class="bar-value" style="color:var(--accent-food)">${stat.food_access_pct}%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label" style="color:var(--accent-risk)">⚠️ เสี่ยง</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(stat.flood_risk_pct/maxFlood*100).toFixed(0)}%;background:var(--accent-risk)"></div></div>
+      <span class="bar-value" style="color:var(--accent-risk)">${stat.flood_risk_pct}%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">🏙️ เมือง</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${stat.urban_pct.toFixed(0)}%;background:var(--text-secondary)"></div></div>
+      <span class="bar-value">${stat.urban_pct}%</span>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text-muted)">
+      พื้นที่รวม: ${stat.total_area_rai.toLocaleString()} ไร่
+    </div>
+  `;
+}
+
+// ═══ PRODUCTION CALCULATOR (LULC → kg/year) ═══
+function computeProduction() {
+  const byType = new Map();
+  const byCategory = new Map();
+  let totalArea = 0;
+  let totalProd = 0;
+  let foodArea = 0;
+
+  for (const f of foodFeatures) {
+    const lu = f.properties.LU_DES_EN || 'Unknown';
+    const area = +f.properties.Area_Rai || 0;
+    const info = lookupYield(lu);
+    const prod = area * info.yield;
+
+    totalArea += area;
+    totalProd += prod;
+    if (info.category !== 'non_food') foodArea += area;
+
+    if (!byType.has(lu)) {
+      byType.set(lu, { lu, area: 0, prod: 0, yieldPerRai: info.yield, category: info.category, label: info.label, color: info.color });
+    }
+    const t = byType.get(lu);
+    t.area += area;
+    t.prod += prod;
+
+    if (!byCategory.has(info.category)) {
+      byCategory.set(info.category, { category: info.category, area: 0, prod: 0, ...CATEGORY_META[info.category] });
+    }
+    const c = byCategory.get(info.category);
+    c.area += area;
+    c.prod += prod;
+  }
+
+  const types = [...byType.values()].sort((a,b) => b.prod - a.prod);
+  const cats  = [...byCategory.values()].sort((a,b) => b.prod - a.prod);
+  return { types, cats, totalArea, totalProd, foodArea };
+}
+
+function fmtKg(kg) {
+  if (kg >= 1e6) return (kg / 1e6).toFixed(2) + ' พันตัน';
+  if (kg >= 1e3) return (kg / 1e3).toFixed(1) + ' ตัน';
+  return Math.round(kg).toLocaleString() + ' กก.';
+}
+function fmtRai(n) { return Math.round(n).toLocaleString(); }
+
+function renderProduction() {
+  if (!foodFeatures.length) {
+    document.getElementById('production').innerHTML = '<p style="color:var(--text-muted)">กำลังโหลดข้อมูล...</p>';
+    return;
+  }
+  const { types, cats, totalArea, totalProd, foodArea } = computeProduction();
+  const maxCatProd = Math.max(...cats.map(c => c.prod)) || 1;
+  const foodCats = cats.filter(c => c.category !== 'non_food');
+  const foodTypeCount = types.filter(t => t.category !== 'non_food' && t.prod > 0).length;
+
+  const catRowsHtml = foodCats.map(c => `
+    <div class="cat-row">
+      <div class="cat-name" style="color:${c.color}">${c.label}</div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${(c.prod/maxCatProd*100).toFixed(1)}%;background:${c.color}"></div></div>
+      <div class="cat-area">${fmtRai(c.area)} ไร่</div>
+      <div class="cat-prod" style="color:${c.color}">${fmtKg(c.prod)}</div>
+    </div>
+  `).join('');
+
+  const tableRowsHtml = types.filter(t => t.category !== 'non_food' && t.prod > 0).map(t => `
+    <tr>
+      <td>${t.lu}</td>
+      <td><span class="tag" style="background:${t.color}22;color:${t.color}">${t.label}</span></td>
+      <td class="num">${fmtRai(t.area)}</td>
+      <td class="num">${t.yieldPerRai.toLocaleString()}</td>
+      <td class="num"><strong>${fmtKg(t.prod)}</strong></td>
+    </tr>
+  `).join('');
+
+  const nonFoodRows = types.filter(t => t.category === 'non_food').map(t => `
+    <tr style="opacity:0.55">
+      <td>${t.lu}</td>
+      <td><span class="tag" style="background:#64748b22;color:#94a3b8">${t.label}</span></td>
+      <td class="num">${fmtRai(t.area)}</td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('production').innerHTML = `
+<h2>🌾 ปริมาณการผลิตอาหาร (LULC-based Estimation)</h2>
+<p class="sub">ประเมินจากพื้นที่การใช้ประโยชน์ที่ดิน (LULC) คูณด้วยอัตราผลผลิตเฉลี่ยต่อไร่ของแต่ละชนิดพืช/สัตว์น้ำ</p>
+
+<div class="prod-summary">
+  <div class="stat-card food">
+    <div class="value">${fmtKg(totalProd)}</div>
+    <div class="label">ผลผลิตรวมต่อปี</div>
+  </div>
+  <div class="stat-card neutral">
+    <div class="value">${fmtRai(foodArea)}</div>
+    <div class="label">พื้นที่ผลิตอาหาร (ไร่)</div>
+  </div>
+  <div class="stat-card transit">
+    <div class="value">${foodTypeCount}</div>
+    <div class="label">ชนิดพืช/สัตว์น้ำ</div>
+  </div>
+  <div class="stat-card risk">
+    <div class="value">${fmtRai(totalArea - foodArea)}</div>
+    <div class="label">พื้นที่ไม่ใช่อาหาร (ไร่)</div>
+  </div>
+</div>
+
+<h3>หมวดการผลิต</h3>
+${catRowsHtml}
+
+<h3>รายการผลิตตามชนิด (เรียงจากมากไปน้อย)</h3>
+<table class="prod-table">
+  <thead>
+    <tr>
+      <th>LULC Type</th>
+      <th>หมวด</th>
+      <th class="num">พื้นที่ (ไร่)</th>
+      <th class="num">ผลผลิต (กก./ไร่/ปี)</th>
+      <th class="num">ผลผลิตรวม</th>
+    </tr>
+  </thead>
+  <tbody>${tableRowsHtml}</tbody>
+</table>
+
+${nonFoodRows ? `
+<h3>พื้นที่ไม่นับเป็นอาหาร (ทิ้งร้าง / ไม้ใช้สอย / ไม้ดอก)</h3>
+<table class="prod-table">
+  <thead>
+    <tr>
+      <th>LULC Type</th>
+      <th>หมวด</th>
+      <th class="num">พื้นที่ (ไร่)</th>
+      <th class="num">ผลผลิต (กก./ไร่/ปี)</th>
+      <th class="num">ผลผลิตรวม</th>
+    </tr>
+  </thead>
+  <tbody>${nonFoodRows}</tbody>
+</table>` : ''}
+
+<div class="method-note">
+  <strong>วิธีคำนวณ:</strong> ผลผลิต (กก./ปี) = พื้นที่ (ไร่) × อัตราผลผลิตเฉลี่ยต่อไร่
+  · อัตราอ้างอิงจากค่ามาตรฐานเกษตรไทย (เช่น ข้าว 450 กก./ไร่, กล้วย 3,500 กก./ไร่, ผักสวนครัว 3,000 กก./ไร่, ปลาน้ำจืด 600 กก./ไร่)
+  · พื้นที่ทิ้งร้าง (Abandoned) นับพื้นที่แต่ผลผลิต = 0
+  · ค่าประมาณการรายปี ไม่ใช่ผลผลิตจริง การผันผวนจากฤดูกาล/พันธุ์/ระบบเพาะปลูก ไม่ได้รวมในแบบจำลองนี้
+</div>
+  `;
+}
+
+// ═══ DATA LOADING ═══
+async function loadData() {
+  try {
+    // Load all data files
+    const [transitRes, mrtLinesRes, districtRes, boundaryRes, foodRes, riskRes, statsRes] = await Promise.all([
+      fetch('transit_stations.geojson'),
+      fetch('mrt_lines.geojson'),
+      fetch('districts.geojson'),
+      fetch('bkk_boundary.geojson'),
+      fetch('food_areas.geojson'),
+      fetch('risk_areas.geojson'),
+      fetch('district_stats.json')
+    ]);
+
+    const transitData = await transitRes.json();
+    const mrtLinesData = await mrtLinesRes.json();
+    const districtData = await districtRes.json();
+    const boundaryData = await boundaryRes.json();
+    const foodData = await foodRes.json();
+    const riskData = await riskRes.json();
+    districtStats = await statsRes.json();
+    foodFeatures = foodData.features || [];
+
+    // ─── Bangkok boundary ───
+    L.geoJSON(boundaryData, {
+      style: {
+        color: '#fff',
+        weight: 2,
+        opacity: 0.3,
+        fillColor: 'transparent',
+        fillOpacity: 0,
+        dashArray: '8,6'
+      }
+    }).addTo(layers.boundary);
+
+    // ─── Districts ───
+    districtGeoJSON = L.geoJSON(districtData, {
+      style: feature => {
+        const stat = districtStats.find(d => d.AMPHOE_E === feature.properties.AMPHOE_E);
+        return {
+          color: 'rgba(255,255,255,0.15)',
+          weight: 1,
+          fillColor: stat ? getDistrictColor(stat) : 'transparent',
+          fillOpacity: 0.12
+        };
+      },
+      onEachFeature: (feature, layer) => {
+        const stat = districtStats.find(d => d.AMPHOE_E === feature.properties.AMPHOE_E);
+        if (stat) {
+          layer.bindPopup(createDistrictPopup(stat));
+          layer.on('click', () => showDistrictInfo(stat.AMPHOE_E));
+        }
+        layer.on('mouseover', function() { this.setStyle({ fillOpacity: 0.25, weight: 2 }); });
+        layer.on('mouseout', function() { this.setStyle({ fillOpacity: 0.12, weight: 1 }); });
+      }
+    }).addTo(layers.districts);
+
+    // Populate filter
+    const select = document.getElementById('districtFilter');
+    const districtNames = districtStats.map(d => ({ en: d.AMPHOE_E, th: d.AMPHOE_T }))
+      .sort((a,b) => a.en.localeCompare(b.en));
+    districtNames.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.en;
+      opt.textContent = `${d.th} (${d.en})`;
+      select.appendChild(opt);
+    });
+
+    // ─── Transit stations ───
+    L.geoJSON(transitData, {
+      pointToLayer: (feature, latlng) => {
+        const isBTS = feature.properties.type === 'BTS';
+        return L.circleMarker(latlng, {
+          radius: 5,
+          fillColor: isBTS ? '#00d4ff' : '#a855f7',
+          color: isBTS ? '#00d4ff' : '#a855f7',
+          weight: 1,
+          opacity: 0.9,
+          fillOpacity: 0.8
+        });
+      },
+      onEachFeature: (feature, layer) => {
+        const p = feature.properties;
+        layer.bindPopup(`
+          <div class="popup-title">${p.name}</div>
+          <div class="popup-row"><span>ประเภท</span><span>${p.type}</span></div>
+          <div class="popup-row"><span>รหัส</span><span>${p.id}</span></div>
+          ${p.district ? `<div class="popup-row"><span>เขต</span><span>${p.district}</span></div>` : ''}
+          <div class="popup-badge" style="background:${p.type==='BTS'?'rgba(0,212,255,0.2);color:#00d4ff':'rgba(168,85,247,0.2);color:#a855f7'}">${p.type}</div>
+        `);
+      }
+    }).addTo(layers.transit);
+
+    // ─── MRT lines ───
+    L.geoJSON(mrtLinesData, {
+      style: {
+        color: '#0ea5e9',
+        weight: 3,
+        opacity: 0.6
+      }
+    }).addTo(layers.transit);
+
+    // ─── Food areas ───
+    L.geoJSON(foodData, {
+      style: {
+        fillColor: '#4ade80',
+        fillOpacity: 0.25,
+        color: '#4ade80',
+        weight: 0.5,
+        opacity: 0.4
+      },
+      onEachFeature: (feature, layer) => {
+        layer.bindPopup(`
+          <div class="popup-title">🌾 พื้นที่เกษตรกรรม</div>
+          <div class="popup-row"><span>ประเภท</span><span>${feature.properties.LU_DES_EN || 'Agriculture'}</span></div>
+          <div class="popup-row"><span>พื้นที่</span><span>${(feature.properties.Area_Rai || 0).toLocaleString()} ไร่</span></div>
+          <div class="popup-badge" style="background:rgba(74,222,128,0.2);color:#4ade80">Food Production</div>
+        `);
+      }
+    }).addTo(layers.food);
+
+    // ─── Risk areas ───
+    L.geoJSON(riskData, {
+      style: feature => {
+        const cat = feature.properties.category;
+        if (cat === 'water') return { fillColor: '#3b82f6', fillOpacity: 0.3, color: '#3b82f6', weight: 0.5, opacity: 0.4 };
+        if (cat === 'open_green') return { fillColor: '#f97316', fillOpacity: 0.2, color: '#f97316', weight: 0.5, opacity: 0.3 };
+        return { fillColor: '#ef4444', fillOpacity: 0.25, color: '#ef4444', weight: 0.5, opacity: 0.4 };
+      },
+      onEachFeature: (feature, layer) => {
+        const catNames = { water: 'แหล่งน้ำ (River/Canal/Lake)', open_green: 'พื้นที่ลุ่มต่ำ (Marsh/Grassland)', waste_hazard: 'พื้นที่ขยะ/เหมือง' };
+        layer.bindPopup(`
+          <div class="popup-title">⚠️ พื้นที่เสี่ยงภัย</div>
+          <div class="popup-row"><span>ประเภท</span><span>${catNames[feature.properties.category] || feature.properties.category}</span></div>
+          <div class="popup-row"><span>พื้นที่</span><span>${(feature.properties.Area_Rai || 0).toLocaleString()} ไร่</span></div>
+          <div class="popup-badge" style="background:rgba(249,115,22,0.2);color:#f97316">Disaster Risk</div>
+        `);
+      }
+    }).addTo(layers.risk);
+
+    // Update stats
+    const highRiskCount = districtStats.filter(d => d.flood_risk_pct > 15).length;
+    document.getElementById('statRisk').textContent = highRiskCount;
+    document.getElementById('statDistricts').textContent = districtStats.length;
+    document.getElementById('statFood').textContent = districtStats.filter(d => d.food_access_pct > 5).length;
+
+    // Hide loading
+    setTimeout(() => document.getElementById('loading').classList.add('hide'), 500);
+
+  } catch (err) {
+    console.error('Error loading data:', err);
+    document.getElementById('loading').innerHTML = '<p style="color:#f97316">❌ Error loading data: ' + err.message + '</p>';
+  }
+}
+
+function getDistrictColor(stat) {
+  // Composite score - higher = more concern
+  const score = (1 - stat.transit_stations / 14) * 0.3 + stat.flood_risk_pct / 36 * 0.4 + (1 - stat.food_access_pct / 60) * 0.3;
+  if (score > 0.7) return '#ef4444';
+  if (score > 0.5) return '#f97316';
+  if (score > 0.3) return '#eab308';
+  return '#22c55e';
+}
+
+function createDistrictPopup(stat) {
+  return `
+    <div class="popup-title">${stat.AMPHOE_T}</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">${stat.AMPHOE_E}</div>
+    <div class="popup-row"><span>🚆 สถานีรถไฟฟ้า</span><span style="color:var(--accent-transit)">${stat.transit_stations}</span></div>
+    <div class="popup-row"><span>🌾 พื้นที่เกษตร</span><span style="color:var(--accent-food)">${stat.food_access_pct}%</span></div>
+    <div class="popup-row"><span>⚠️ พื้นที่เสี่ยง</span><span style="color:var(--accent-risk)">${stat.flood_risk_pct}%</span></div>
+    <div class="popup-row"><span>🏙️ พื้นที่เมือง</span><span>${stat.urban_pct}%</span></div>
+    <div class="popup-row"><span>📐 พื้นที่ทั้งหมด</span><span>${stat.total_area_rai.toLocaleString()} ไร่</span></div>
+  `;
+}
+
+// Load everything
+loadData();
+</script>
+</body>
+</html>
